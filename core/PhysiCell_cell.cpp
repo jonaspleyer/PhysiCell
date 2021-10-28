@@ -80,6 +80,9 @@
 #ifdef ADDON_PHYSIDFBA
 #include "../addons/dFBA/src/dfba_intracellular.h"
 #endif
+#ifdef ADDON_ODE_SOLVER
+#include "../addons/OdeSolver/ode_solver_intracellular.h"
+#endif
 
 #include<limits.h>
 
@@ -2279,7 +2282,6 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 	if( node )
 	{
 		std::string model_type = node.attribute( "type" ).value(); 
-		
 #ifdef ADDON_PHYSIBOSS
 		if (model_type == "maboss") {
 			// If it has already be copied
@@ -2328,7 +2330,19 @@ Cell_Definition* initialize_cell_definition_from_pugixml( pugi::xml_node cd_node
 		}
 #endif
 
-	}	
+#ifdef ADDON_ODE_SOLVER
+		if (model_type == "ode_solver") {
+			// If it has already be copied
+			if (pParent != NULL && pParent->phenotype.intracellular != NULL) {
+				//pCD->phenotype.intracellular->initialize_intracellular_from_pugixml(node);
+			// Otherwise we need to create a new one
+			} else {
+				OdeSolverIntracellular* pIntra = new OdeSolverIntracellular(node);
+				pCD->phenotype.intracellular = pIntra->getIntracellularModel();
+			}
+		}
+#endif
+	}
 	
 	// set up custom data 
 	node = cd_node.child( "custom_data" );

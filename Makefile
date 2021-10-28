@@ -192,6 +192,15 @@ cancer-metabolism-sample:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
 	cp ./sample_projects_intracellular/fba/cancer_metabolism/config/* ./config/
 
+activator-inhibitor-sample:
+	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/custom_modules* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/main.cpp ./main.cpp
+	mkdir ./build
+	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/Makefile ./build
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
+	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/config/* ./config/
+
 # early examples for convergence testing 
 
 physicell_test_mech1: $(PhysiCell_OBJECTS) ./examples/PhysiCell_test_mechanics_1.cpp 
