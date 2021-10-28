@@ -193,7 +193,7 @@ cancer-metabolism-sample:
 	cp ./sample_projects_intracellular/fba/cancer_metabolism/config/* ./config/
 
 activator-inhibitor-sample:
-	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/custom_modules* ./custom_modules/
+	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
 	cp ./sample_projects_intracellular/ode-solver/activator-inhibitor-sample/main.cpp ./main.cpp
 	mkdir ./build
