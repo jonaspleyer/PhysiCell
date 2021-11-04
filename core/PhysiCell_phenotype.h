@@ -546,6 +546,8 @@ class Molecular
 		
 };
 
+typedef void (*update_func)(const std::vector<double> &X, std::vector<double> &dX, const double dt);
+
 class Intracellular
 {
  private:
@@ -596,6 +598,10 @@ class Intracellular
     virtual int validate_PhysiCell_tokens(PhysiCell::Phenotype& phenotype) = 0;
     virtual int validate_SBML_species() = 0;
     virtual int create_custom_data_for_SBML(PhysiCell::Phenotype& phenotype) = 0;
+
+    // ================  specific to "odeSolver" ================
+	// This functions defines the update Function for the RHS of the ODE
+    virtual void setUpdateFunction(update_func update_RHS_func) = 0;
 };
 
 class Phenotype
