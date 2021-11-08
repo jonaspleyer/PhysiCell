@@ -168,6 +168,8 @@ void setup_tissue( void )
 				pC = create_cell( *pCD );
 				pC->assign_position( position );
 				pC->phenotype.intracellular->start();
+
+				std::cout << pC->phenotype.molecular.internalized_total_substrates << std::endl;
 				pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom);
 			}
 		}
@@ -188,8 +190,6 @@ void update_intracellular()
     #pragma omp parallel for
     for( int i=0; i < (*all_cells).size(); i++ )
     {
-    	std::ofstream myfile;
-		myfile.open ("logs.txt", std::ios_base::app);
     	for ( int j=0; j<N_species; j++ )
     	{
     		std::string substrate_name = microenvironment.density_names[j];
@@ -199,9 +199,8 @@ void update_intracellular()
 				double cell_volume = (*all_cells)[i]->phenotype.volume.total; // Cell Volume
 				double substrate_density_internal = (*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index]/cell_volume; // Intracellular Concentrations
 
-				myfile << substrate_density_internal << ",";
 				// Update with OdeSolver
-				if ( PhysiCell_globals.current_time > 0 )
+				if ( PhysiCell_globals.current_time < -diffusion_dt*1.0001 )
 				{
 					(*all_cells)[i]->phenotype.intracellular->set_parameter_value(substrate_name,substrate_density_internal);
 				}
@@ -213,8 +212,6 @@ void update_intracellular()
 				(*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index] = (*all_cells)[i]->phenotype.intracellular->get_parameter_value(substrate_name) * cell_volume;
 			}
         }
-    	myfile << std::endl;
-    	myfile.close();
     }
 }
 
