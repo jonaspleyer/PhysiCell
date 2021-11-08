@@ -211,7 +211,7 @@
                 
 				<intracellular type="ode_solver">
 					<mathml_file>./config/RHS_ODE.xml</mathml_file>
-                    <intracellular_dt>0.01</intracellular_dt>
+                    <intracellular_dt>0.0001</intracellular_dt>
                     <substrate name="activator">
                     	<map PC_substrate="activator" mathml_species="A"></map >
                     	<initial_condition>300</initial_condition>
