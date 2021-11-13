@@ -1,5 +1,5 @@
 rm ./secretion_project
-rm logs.txt
+rm output/logs*
 cd build
 make
 cd ..

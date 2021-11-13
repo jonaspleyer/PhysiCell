@@ -602,6 +602,7 @@ class Intracellular
     // ================  specific to "odeSolver" ================
 	// This functions defines the update Function for the RHS of the ODE
     virtual void setUpdateFunction(update_func update_RHS_func) = 0;
+    virtual void update_Cell_parameters(Cell &cell) = 0;
 };
 
 class Phenotype

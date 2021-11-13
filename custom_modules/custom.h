@@ -85,3 +85,4 @@ std::vector<std::string> my_coloring_function( Cell* );
 void update_intracellular();
 
 void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, const double dt);
+void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double dt);

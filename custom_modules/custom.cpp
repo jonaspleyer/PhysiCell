@@ -96,14 +96,14 @@ void create_cell_types( void )
 	
 	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
 	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
-	
+
 	/*
 	   This parses the cell definitions in the XML config file. 
 	*/
 	initialize_cell_definitions_from_pugixml(); 
 
-	build_cell_definitions_maps(); 
-	display_cell_definitions( std::cout ); 
+	build_cell_definitions_maps();
+	display_cell_definitions( std::cout );
 	
 	return; 
 }
@@ -167,10 +167,16 @@ void setup_tissue( void )
 
 				pC = create_cell( *pCD );
 				pC->assign_position( position );
+				// If not done previously define the update function for the RHS of ode solver
+				if ( pCD->name == "custom_cell" )
+				{
+					pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom);
+				}
+				else
+				{
+					pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom_custom_cell);
+				}
 				pC->phenotype.intracellular->start();
-
-				std::cout << pC->phenotype.molecular.internalized_total_substrates << std::endl;
-				pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom);
 			}
 		}
 	}
@@ -182,44 +188,82 @@ void setup_tissue( void )
 	return; 
 }
 
-void update_intracellular()
-{
-    // BioFVM Indices
-    static int N_species = (*all_cells)[0]->phenotype.molecular.internalized_total_substrates.size();
-
-    #pragma omp parallel for
-    for( int i=0; i < (*all_cells).size(); i++ )
-    {
-    	for ( int j=0; j<N_species; j++ )
-    	{
-    		std::string substrate_name = microenvironment.density_names[j];
-    		int substrate_index = microenvironment.find_density_index(substrate_name);
-			if( (*all_cells)[i]->is_out_of_domain == false  )
-			{
-				double cell_volume = (*all_cells)[i]->phenotype.volume.total; // Cell Volume
-				double substrate_density_internal = (*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index]/cell_volume; // Intracellular Concentrations
-
-				// Update with OdeSolver
-				if ( PhysiCell_globals.current_time < -diffusion_dt*1.0001 )
-				{
-					(*all_cells)[i]->phenotype.intracellular->set_parameter_value(substrate_name,substrate_density_internal);
-				}
-
-				(*all_cells)[i]->phenotype.intracellular->update(); // SBML Simulation
-				(*all_cells)[i]->phenotype.intracellular->update_phenotype_parameters((*all_cells)[i]->phenotype); // Phenotype Simulation
-
-				// Internalized Chemical Update After SBML Simulation
-				(*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index] = (*all_cells)[i]->phenotype.intracellular->get_parameter_value(substrate_name) * cell_volume;
-			}
-        }
-    }
-}
+//void update_intracellular()
+//{
+//    // BioFVM Indices
+//    static int N_species = (*all_cells)[0]->phenotype.molecular.internalized_total_substrates.size();
+//
+//    #pragma omp parallel for
+//    for( int i=0; i < (*all_cells).size(); i++ )
+//    {
+//    	for ( int j=0; j<N_species; j++ )
+//    	{
+//    		std::string substrate_name = microenvironment.density_names[j];
+//    		int substrate_index = microenvironment.find_density_index(substrate_name);
+//			if( (*all_cells)[i]->is_out_of_domain == false  )
+//			{
+//				double cell_volume = (*all_cells)[i]->phenotype.volume.total; // Cell Volume
+//				double substrate_density_internal = (*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index]/cell_volume; // Intracellular Concentrations
+//
+//				// Update with OdeSolver
+//				if ( PhysiCell_globals.current_time < -diffusion_dt*1.0001 )
+//				{
+//					(*all_cells)[i]->phenotype.intracellular->set_parameter_value(substrate_name,substrate_density_internal);
+//				}
+//
+//				(*all_cells)[i]->phenotype.intracellular->update(); // SBML Simulation
+//				(*all_cells)[i]->phenotype.intracellular->update_phenotype_parameters((*all_cells)[i]->phenotype); // Phenotype Simulation
+//
+//				// Internalized Chemical Update After SBML Simulation
+//				(*all_cells)[i]->phenotype.molecular.internalized_total_substrates[substrate_index] = (*all_cells)[i]->phenotype.intracellular->get_parameter_value(substrate_name) * cell_volume;
+//			}
+//        }
+//    }
+//}
 
 void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, const double t)
 {
-	std::vector<double> result;
-	for ( int i=0; i<X.size(); i++ ) {
-		result.push_back(100.0 + i*20 - X[i]);
+	int N_external = microenvironment.density_names.size();
+	int N_internal = X.size() - N_external;
+	std::vector<double> ext_val(X.begin() ,X.begin()+N_external);
+	std::vector<double> int_val(X.begin()+N_external, X.begin()+2*N_external);
+	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
+	std::vector<double> result(X.size(),0);
+
+	for ( int i=0; i<N_external + N_internal; i++ ) {
+		if ( i< N_external )
+		{
+			result[i] = (int_val[i]-ext_val[i]);
+		}
+		else
+		{
+			result[i] = 100.0 + i*20 - X[i];
+		}
+	}
+	dX = result;
+	return;
+}
+
+void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double t)
+{
+	int N_external = microenvironment.density_names.size();
+	int N_internal = X.size() - N_external;
+	std::vector<double> ext_val(X.begin() ,X.begin()+N_external);
+	std::vector<double> int_val(X.begin()+N_external, X.begin()+2*N_external);
+	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
+	std::vector<double> result(X.size(),0);
+
+	for ( int i=0; i<N_external + N_internal; i++ ) {
+		// This changes the external values
+		if ( i< N_external )
+		{
+			result[i] = 0;
+		}
+		// This changes internal and pure internal values
+		else
+		{
+			result[i] = ext_val[i-N_external] - int_val[i-N_external];
+		}
 	}
 	dX = result;
 	return;

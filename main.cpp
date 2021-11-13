@@ -231,12 +231,12 @@ int main( int argc, char* argv[] )
             
             //update_intracellular();
             
-            if( PhysiCell_globals.current_time >= next_intracellular_update )
-            {
-            	update_intracellular();
-
-                next_intracellular_update += intracellular_dt; 
-            }
+//            if( PhysiCell_globals.current_time >= next_intracellular_update )
+//            {
+//            	update_intracellular();
+//
+//                next_intracellular_update += intracellular_dt;
+//            }
 
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
