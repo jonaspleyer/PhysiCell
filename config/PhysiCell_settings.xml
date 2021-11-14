@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">6</max_time>
+		<max_time units="min">3000</max_time>
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
@@ -97,19 +97,19 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>14</omp_num_threads>
+		<omp_num_threads>4</omp_num_threads>
 	</parallel> 
 	
 	<save>
 		<folder>output</folder> <!-- use . for root --> 
 
 		<full_data>
-			<interval units="min">30</interval>
+			<interval units="min">20</interval>
 			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
-			<interval units="min">30</interval>
+			<interval units="min">20</interval>
 			<enable>true</enable>
 		</SVG>
 		
@@ -125,30 +125,21 @@
 	<microenvironment_setup>
 		<variable name="activator" units="mmHg" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">100.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">100</diffusion_coefficient>
 				<decay_rate units="1/min">0.0</decay_rate>  
 			</physical_parameter_set>
-			<initial_condition units="mmHg">0.004</initial_condition>
+			<initial_condition units="mmHg">1</initial_condition>
 			<Dirichlet_boundary_condition units="mmHg" enabled="false">0</Dirichlet_boundary_condition>
 		</variable>
         
 		<variable name="inhibitor" units="mM" ID="1">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">3</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">1000</diffusion_coefficient>
 				<decay_rate units="1/min">0.0</decay_rate>  
 			</physical_parameter_set>
-			<initial_condition units="mM">0.003</initial_condition>
+			<initial_condition units="mM">1</initial_condition>
 			<Dirichlet_boundary_condition units="mmHg" enabled="false">0.0</Dirichlet_boundary_condition>
  		</variable>
- 		
- 		<variable name="external_dummy_substrate" units="kg/m^3" ID="2">
-			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">0</diffusion_coefficient>
-				<decay_rate units="1/min">0.0</decay_rate>  
-			</physical_parameter_set>
-			<initial_condition units="mM">0</initial_condition>
-			<Dirichlet_boundary_condition units="mmHg" enabled="false">0.0</Dirichlet_boundary_condition>
-		</variable>
 
 		<options>
 			<calculate_gradients>false</calculate_gradients>
@@ -216,12 +207,6 @@
 						<uptake_rate units="1/min">0.0</uptake_rate>
 						<net_export_rate units="total substrate/min">0</net_export_rate> 
                     </substrate>
-                    <substrate name="external_dummy_substrate">
-						<secretion_rate units="1/min">0.0</secretion_rate>
-						<secretion_target units="substrate density">0</secretion_target>
-						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
-                    </substrate>
 				</secretion>
 				                
 				<intracellular type="ode_solver">
@@ -229,77 +214,13 @@
                     <intracellular_dt>0.0001</intracellular_dt>
                     <substrate name="activator">
                     	<map PC_substrate="activator" mathml_species="A"></map >
-                    	<initial_condition>300</initial_condition>
+                    	<initial_condition>5</initial_condition>
                     </substrate>
                     <substrate name="inhibitor">
                     	<map PC_substrate="inhibitor" mathml_species="B"></map >
-                    	<initial_condition>40</initial_condition>
+                    	<initial_condition>5</initial_condition>
                     </substrate>
 				</intracellular>
-			</phenotype>
-            <custom_data>
-			</custom_data>
-		</cell_definition>
-
-		<cell_definition name="custom_cell" ID="1">
-			<phenotype>
-				<cycle code="5" name="live">  
-					<transition_rates units="1/min"> 
-						<rate start_index="0" end_index="0" fixed_duration="false">0.0</rate>
-					</transition_rates>
-				</cycle>			
-				<death>  
-					<model code="100" name="apoptosis"> 
-						<death_rate units="1/min">0.0</death_rate>
-					</model> 
-					<model code="101" name="necrosis">
-						<death_rate units="1/min">0.0</death_rate>
-					</model> 
-				</death>					
-				<volume>  
-					<total units="micron^3">1500</total>
-					<fluid_change_rate units="1/min">0.0</fluid_change_rate>
-					<fluid_fraction units="dimensionless">0.5</fluid_fraction>
-					<nuclear units="micron^3">250</nuclear>
-                    
-					<fluid_change_rate units="1/min">0.5</fluid_change_rate>
-					<cytoplasmic_biomass_change_rate units="1/min">0.025</cytoplasmic_biomass_change_rate>
-					<nuclear_biomass_change_rate units="1/min">0.15</nuclear_biomass_change_rate>
-					
-					<calcified_fraction units="dimensionless">0</calcified_fraction>
-					<calcification_rate units="1/min">0</calcification_rate>
-					
-					<relative_rupture_volume units="dimensionless">1.0</relative_rupture_volume>
-				</volume> 				
-                
-				<motility> 
-                	<speed units="micron/min">0.0</speed>
-					<persistence_time units="min">0.0</persistence_time>
-					<migration_bias units="dimensionless">0.0</migration_bias>
-				</motility>
-				
-                <secretion>
-                    <substrate name="activator">
-						<secretion_rate units="1/min">0.0</secretion_rate>
-						<secretion_target units="substrate density">0.0</secretion_target>
-						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
-                    </substrate>
-				</secretion>
-				
-				<intracellular type="ode_solver">
-					<mathml_file>./config/RHS_ODE.xml</mathml_file>
-                    <intracellular_dt>0.0001</intracellular_dt>
-                    <substrate_int>
-                    	<map substrate="activator" mathml_species="XA"></map >
-                    	<initial_condition_int>300</initial_condition_int>
-                    </substrate_int>
-                    <substrate_int>
-                    	<map substrate="internal_dummy_substrate" mathml_species="XY"></map >
-                    	<initial_condition_int>100</initial_condition_int>
-                    </substrate_int>
-				</intracellular>
-				
 			</phenotype>
             <custom_data>
 			</custom_data>
@@ -308,7 +229,16 @@
 	
 	<user_parameters>
 		<random_seed type="int" units="dimensionless">0</random_seed>
-     	<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1</number_of_cells>
+     	<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">9</number_of_cells>
+     	<k1 type="double" units="none" description="parameter in act-inh-reaction">0.1</k1>
+     	<k2 type="double" units="none" description="parameter in act-inh-reaction">5</k2>
+     	<k3 type="double" units="none" description="parameter in act-inh-reaction">12</k3>
+     	<k4 type="double" units="none" description="parameter in act-inh-reaction">5</k4>
+     	<k5 type="double" units="none" description="parameter in act-inh-reaction">0.02</k5>
+     	<k6 type="double" units="none" description="parameter in act-inh-reaction">1</k6>
+     	<k7 type="double" units="none" description="parameter in act-inh-reaction">11</k7>
+     	<secretion_activator type="double" units="none" description="secretion parameter between act_int and act_ext">0.5</secretion_activator>
+     	<secretion_inhibitor type="double" units="none" description="secretion parameter between inh_int and inh_ext">0.5</secretion_inhibitor>
 	</user_parameters>
 	
 </PhysiCell_settings>

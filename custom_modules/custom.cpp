@@ -253,16 +253,40 @@ void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<dou
 	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
 	std::vector<double> result(X.size(),0);
 
-	for ( int i=0; i<N_external + N_internal; i++ ) {
+	double k1 = parameters.doubles("k1");
+	double k2 = parameters.doubles("k2");
+	double k3 = parameters.doubles("k3");
+	double k4 = parameters.doubles("k4");
+	double k5 = parameters.doubles("k5");
+	double k6 = parameters.doubles("k6");
+	double k7 = parameters.doubles("k7");
+
+	double secr_act = parameters.doubles("secretion_activator");
+	double secr_inh = parameters.doubles("secretion_inhibitor");
+
+	for ( int i=0; i<X.size(); i++ ) {
 		// This changes the external values
 		if ( i< N_external )
 		{
-			result[i] = 0;
+			if ( i == 0)
+			{
+				result[i] = -secr_act * (ext_val[i]-int_val[i]);
+			}
+			else if ( i == 1)
+			{
+				result[i] = -secr_inh * (ext_val[i]-int_val[i]);
+			}
 		}
 		// This changes internal and pure internal values
 		else
 		{
-			result[i] = ext_val[i-N_external] - int_val[i-N_external];
+			if ( i == 0 ){
+				result[i] = k1 - k2 * pow(int_val[0],2) - k3 * pow(int_val[0],2) / (k4*int_val[1]+k5);
+			}
+			else if ( i == 1 )
+			{
+				result[i] = k6 * pow(ext_val[0],2) - k7*int_val[1];
+			}
 		}
 	}
 	dX = result;

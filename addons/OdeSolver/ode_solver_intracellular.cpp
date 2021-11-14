@@ -171,28 +171,28 @@ void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell)
 		N_ext_vals = cell.phenotype.molecular.internalized_total_substrates.size();
 		initialized = true;
 
-		// Just for testing
-		std::ofstream outfile;
-		std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
-		outfile.open(filename, std::ios_base::app); // append instead of overwrite
-		outfile << "steps ";
-		for (int i=0; i<N_int_vals + N_ext_vals; i++)
-		{
-			if ( i < N_ext_vals)
-			{
-				outfile << "ext:" << cell.phenotype.secretion.pMicroenvironment->density_names[i] << " ";
-			}
-			else if ( i <  2*N_ext_vals)
-			{
-				outfile << "int:" << cell.phenotype.secretion.pMicroenvironment->density_names[i-N_ext_vals] << " ";
-			}
-			else
-			{
-				outfile << "int:" << index_to_substrate_name[i-N_ext_vals+1] << " ";
-			}
-		}
-		outfile << std::endl;
-		outfile.close();
+//		// Just for testing
+//		std::ofstream outfile;
+//		std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
+//		outfile.open(filename, std::ios_base::app); // append instead of overwrite
+//		outfile << "steps ";
+//		for (int i=0; i<N_int_vals + N_ext_vals; i++)
+//		{
+//			if ( i < N_ext_vals)
+//			{
+//				outfile << "ext:" << cell.phenotype.secretion.pMicroenvironment->density_names[i] << " ";
+//			}
+//			else if ( i <  2*N_ext_vals)
+//			{
+//				outfile << "int:" << cell.phenotype.secretion.pMicroenvironment->density_names[i-N_ext_vals] << " ";
+//			}
+//			else
+//			{
+//				outfile << "int:" << index_to_substrate_name[i-N_ext_vals+1] << " ";
+//			}
+//		}
+//		outfile << std::endl;
+//		outfile.close();
 		// Testing part end
 	}
 	else
@@ -225,11 +225,11 @@ void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell)
 	external_change /= voxel_volume;
 
 	// Just for testing
-	std::ofstream outfile;
-	std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
-	outfile.open(filename, std::ios_base::app); // append instead of overwrite
-	outfile << steps << " " << combined_substrate_values << std::endl;
-	outfile.close();
+//	std::ofstream outfile;
+//	std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
+//	outfile.open(filename, std::ios_base::app); // append instead of overwrite
+//	outfile << steps << " " << combined_substrate_values << std::endl;
+//	outfile.close();
 
 	// Update newly calculated parameters
 	if ( default_microenvironment_options.track_internalized_substrates_in_each_agent )
