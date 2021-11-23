@@ -169,7 +169,8 @@ void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell)
 	// Check if Intracellular was just previously initialized. If so do not copy values. Only used to write initial values.
 	if (initialized == false)
 	{
-		N_ext_vals = cell.phenotype.molecular.internalized_total_substrates.size();
+		N_ext_vals = cell.phenotype.molecular.pMicroenvironment->number_of_densities();
+		combined_substrate_values.resize(N_ext_vals+N_int_vals,0);
 		initialized = true;
 
 //		// Just for testing
