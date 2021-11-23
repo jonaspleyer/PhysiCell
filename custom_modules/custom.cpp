@@ -104,7 +104,11 @@ void create_cell_types( void )
 
 	build_cell_definitions_maps();
 	display_cell_definitions( std::cout );
-	
+
+	// Set the update RHS rule for the default cell definition
+	// This NEEDS to be done after Intracellular was initialized by the xml file!
+	cell_defaults.phenotype.intracellular->setUpdateFunction(update_RHS_custom_custom_cell);
+
 	return; 
 }
 
@@ -167,15 +171,6 @@ void setup_tissue( void )
 
 				pC = create_cell( *pCD );
 				pC->assign_position( position );
-				// If not done previously define the update function for the RHS of ode solver
-				if ( pCD->name == "custom_cell" )
-				{
-					pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom);
-				}
-				else
-				{
-					pC->phenotype.intracellular->setUpdateFunction(update_RHS_custom_custom_cell);
-				}
 				pC->phenotype.intracellular->start();
 			}
 		}
