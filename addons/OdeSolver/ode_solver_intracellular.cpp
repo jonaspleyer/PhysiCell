@@ -111,7 +111,8 @@ void OdeSolverIntracellular::initialize_intracellular_from_pugixml(pugi::xml_nod
 		}
 		if (ID > substrate_values.size())
 		{
-			substrate_values.resize(ID, init_val);
+			substrate_values.resize(ID, 0);
+			substrate_values[ID] = init_val;
 		}
 		else
 		{
