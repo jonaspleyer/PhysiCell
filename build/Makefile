@@ -31,7 +31,7 @@ PhysiCell_custom_module_OBJECTS := custom.o
 
 pugixml_OBJECTS := pugixml.o
 
-ODE_SOLVER_OBJECTS := ode_solver_intracellular.o
+ODE_SOLVER_OBJECTS := ode_solver_intracellular.o RHS.o
 
 PhysiCell_OBJECTS := $(BioFVM_OBJECTS)  $(pugixml_OBJECTS) $(PhysiCell_core_OBJECTS) $(PhysiCell_module_OBJECTS)
 ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(ODE_SOLVER_OBJECTS)
@@ -130,6 +130,9 @@ custom.o: ../custom_modules/custom.cpp
 
 ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h
 	$(COMPILE_COMMAND) -c ../addons/OdeSolver/ode_solver_intracellular.cpp
+
+RHS.o: ../custom_modules/RHS.cpp ../custom_modules/RHS.h
+	$(COMPILE_COMMAND) -c ../custom_modules/RHS.cpp
 
 # cleanup
 	

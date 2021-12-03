@@ -65,28 +65,72 @@
 ###############################################################################
 */
 
+#include "RHS.h"
+
+#include <math.h>
+#include <iostream>
+#include "../modules/PhysiCell_standard_modules.h"
 #include "../core/PhysiCell.h"
-#include "../modules/PhysiCell_standard_modules.h" 
-//#include "RHS.h"
 
-using namespace BioFVM; 
-using namespace PhysiCell;
+void RHS::set_parameter(int id, double value)
+{
+	if ( !initialized )
+	{
+		initialized = true;
+	}
+	// Create new parameter if it does not exist
+	if ( id >= id_to_val.size() )
+	{
+		id_to_val.resize(id+1);
+		id_to_val[id] = value;
+	}
+	// Otherwise change it
+	else
+	{
+		id_to_val[id] = value;
+	}
+	return;
+}
 
-// setup functions to help us along 
+void RHS::set_parameter(std::string name, double value)
+{
+	if ( !initialized )
+	{
+		initialized = true;
+	}
+	name_to_val[name] = value;
+	std::cout << "Set value " << name << " with " << value << std::endl;
+	return;
+}
 
-void create_cell_types( void );
-void setup_tissue( void ); 
+double RHS::P(std::string name)
+{
+	return name_to_val[name];
+}
 
-// set up the BioFVM microenvironment 
-void setup_microenvironment( void ); 
+double RHS::P(int id)
+{
+	return id_to_val[id];
+}
 
-// custom pathology coloring function 
+//void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
+void RHS::operator() ( const state_type &X , state_type &dX , const double dt )
+{
+	// This changes the external values
+//	dX[0] = -P(8) * (ext_val[0]-int_val[0]);
+//	dX[1] = -P(9) * (ext_val[1]-int_val[1]);
 
-std::vector<std::string> my_coloring_function( Cell* );
-void update_intracellular();
+	// This changes internal and pure internal values
+//	dX[2] = P(1) - P(2) * pow(int_val[0],2) - P(3) * pow(int_val[0],2) / (P(4)*int_val[1]+P(5));
+//	dX[3] = P(6) * pow(ext_val[0],2) - P(7)*int_val[1];
 
-void define_cell_parameters ( void );
+	// This changes the external values
+	dX[0] = X[1];
+	dX[1] = -pow(P(5),2)*X[0];
 
-void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, const double dt);
-void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double dt);
-void update_RHS_new(const std::vector<double> &X, std::vector<double> &dX, const double dt);
+	// This changes internal and pure internal values
+	dX[2] = P(1)*(8 - X[2]);
+	dX[3] = P(3)*(P(4) - X[3]);
+
+	return;
+}

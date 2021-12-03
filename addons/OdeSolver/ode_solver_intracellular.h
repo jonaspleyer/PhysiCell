@@ -5,6 +5,7 @@
 #include "../../core/PhysiCell_phenotype.h"
 #include "../../core/PhysiCell_cell.h"
 #include "../../modules/PhysiCell_pugixml.h"
+#include "../../custom_modules/RHS.h"
 
 #include <map>
 
@@ -24,6 +25,7 @@ class OdeSolverIntracellular : public PhysiCell::Intracellular
 	std::map<int, std::string> index_to_substrate_name;
 	// Actual values of internal substrates
 	std::vector<double> substrate_values;
+	std::vector<double> combined_substrate_values;
 
 	bool initialized;
 	int N_int_vals;
@@ -47,15 +49,23 @@ class OdeSolverIntracellular : public PhysiCell::Intracellular
 		clone->index_to_substrate_name = this->index_to_substrate_name;
 		// Vectors
 		clone->substrate_values = this->substrate_values;
+		clone->combined_substrate_values = this->combined_substrate_values;
+		// Doubles
 		clone->intracellular_dt = this->intracellular_dt;
 		// Functions
-		clone->update_RHS = this->update_RHS;
+		// Ints
+		clone->N_ext_vals = this->N_ext_vals;
+		clone->N_int_vals = this->N_int_vals;
+		// RHS Definition
+		clone->RHS_definition = this->RHS_definition;
 		return static_cast<Intracellular*>(clone);
 	}
 	Intracellular* getIntracellularModel() {
         std::cout << "------ ode_solver_intracellular: getIntracellularModel called\n";
 		return static_cast<Intracellular*>(this);
 	}
+
+	RHS RHS_definition;
 
 	// Timescale on which to solve the given differential equations. May be altered by methods with non-constant stepsize approaches.
 	double intracellular_dt;
@@ -83,13 +93,9 @@ class OdeSolverIntracellular : public PhysiCell::Intracellular
 
 	// Get value for model parameter
 	double get_parameter_value(std::string name);
-	
-	double get_parameter_value(int index);
 
 	// Set value for model parameter
 	void set_parameter_value(std::string name, double value);
-
-	void set_parameter_value(int index, double value);
 
 	std::string get_state();
 	
@@ -107,12 +113,11 @@ class OdeSolverIntracellular : public PhysiCell::Intracellular
     int create_custom_data_for_SBML(PhysiCell::Phenotype& phenotype);
 
     // ================  specific to "odeSolver" ================
-    void setUpdateFunction(update_func update_RHS_func);
-    void update_Cell_parameters(PhysiCell::Cell &cell);
+    void update_Cell_parameters(PhysiCell::Cell &cell, double t, double diffusion_dt);
     // Pointer to the right-hand-side of the ODE we want to solve.
-    void (*update_RHS)(const std::vector<double> &X, std::vector<double> &dX, const double dt);
-    void update_internalized_substrates(std::vector<double> &internalized_substrates);
-    void update_substrate_values(std::vector<double> &internalized_substrates);
+    void update_internalized_substrates(std::vector<double> &internalized_substrates, const double cell_volume);
+    void update_substrate_values(std::vector<double> &internalized_substrates, const double cell_volume);
+    void set_parameter_value(int id, double value);
 };
 
 #endif

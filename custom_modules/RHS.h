@@ -65,28 +65,35 @@
 ###############################################################################
 */
 
-#include "../core/PhysiCell.h"
-#include "../modules/PhysiCell_standard_modules.h" 
-//#include "RHS.h"
+#include <map>
+#include <string>
+#include <vector>
 
-using namespace BioFVM; 
-using namespace PhysiCell;
+typedef std::vector<double> state_type;
 
-// setup functions to help us along 
+class RHS
+{
+private:
+	std::vector<double> id_to_val;
+	std::map<std::string, double> name_to_val;
 
-void create_cell_types( void );
-void setup_tissue( void ); 
+	void add_parameter(std::string name, double value);
+	void add_parameter(int id, double value);
+	void change_parameter(std::string name, double value);
+	void change_parameter(int id, double value);
 
-// set up the BioFVM microenvironment 
-void setup_microenvironment( void ); 
+public:
+	int N_ext;
+	int N_int;
 
-// custom pathology coloring function 
+	bool initialized;
 
-std::vector<std::string> my_coloring_function( Cell* );
-void update_intracellular();
+	double P(std::string name);
+	double P(int id);
 
-void define_cell_parameters ( void );
+	void set_parameter(std::string name, double value);
+	void set_parameter(int id, double value);
 
-void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, const double dt);
-void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double dt);
-void update_RHS_new(const std::vector<double> &X, std::vector<double> &dX, const double dt);
+//	void operator() ( const std::vector<double> &X, std::vector<double> &dX, const double dt );
+    void operator() ( const state_type &x , state_type &dxdt , const double dt );
+};

@@ -14,6 +14,9 @@ OdeSolverIntracellular::OdeSolverIntracellular() : Intracellular()
 {
 	intracellular_type = "ode_solver";
 	intracellular_dt = 0.01;
+	initialized = false;
+	N_ext_vals = microenvironment.density_names.size();
+	N_int_vals = substrate_values.size();
 }
 
 OdeSolverIntracellular::OdeSolverIntracellular(pugi::xml_node& node)
@@ -27,6 +30,10 @@ OdeSolverIntracellular::OdeSolverIntracellular(OdeSolverIntracellular* copy)
 	intracellular_type = copy->intracellular_type;
 	mathml_filename = copy->mathml_filename;
 	intracellular_dt = copy->intracellular_dt;
+	initialized = copy->initialized;
+	N_ext_vals = copy->N_ext_vals;
+	N_int_vals = copy->N_int_vals;
+	RHS_definition = copy->RHS_definition;
 }
 
 void OdeSolverIntracellular::initialize_intracellular_from_pugixml(pugi::xml_node& node)
@@ -122,6 +129,11 @@ void OdeSolverIntracellular::initialize_intracellular_from_pugixml(pugi::xml_nod
 		node_substrate = node_substrate.next_sibling( "substrate_int" );
 	}
 
+	// Set parameters for number of internal and external values
+	N_int_vals = substrate_values.size();
+	N_ext_vals = microenvironment.density_names.size();
+	combined_substrate_values.resize(N_ext_vals+N_int_vals,0);
+
     std::cout << "\n------------- " << __FUNCTION__ << ": substrate_species map:" << std::endl;
     for(auto elm : substrate_name_to_species_name)
     {
@@ -136,6 +148,10 @@ void OdeSolverIntracellular::initialize_intracellular_from_pugixml(pugi::xml_nod
 		readMathMLFile(mathml_filename);
 	}
 	std::cout << std::endl;
+
+	RHS_definition.N_ext = N_ext_vals;
+	RHS_definition.N_int = N_int_vals;
+
 	return;
 }
 
@@ -160,64 +176,114 @@ void OdeSolverIntracellular::readMathMLFile(std::string filename)
 void OdeSolverIntracellular::start()
 {
 	N_int_vals = substrate_values.size();
+	N_ext_vals = microenvironment.density_names.size();
+	combined_substrate_values.resize(N_ext_vals+N_int_vals,0);
 	initialized = false;
 	return;
 }
 
-void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell)
+void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell, double t, double diffusion_dt)
 {
 	// Check if Intracellular was just previously initialized. If so do not copy values. Only used to write initial values.
 	if (initialized == false)
 	{
-		N_ext_vals = cell.phenotype.molecular.pMicroenvironment->number_of_densities();
-		combined_substrate_values.resize(N_ext_vals+N_int_vals,0);
 		initialized = true;
+
+		// Just for testing
+//		std::ofstream outfile;
+//		outfile.precision(20);
+//		std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
+//		outfile.open(filename, std::ios_base::app); // append instead of overwrite
+//		outfile << "time ";
+//		outfile << "steps ";
+//		for (int i=0; i<N_int_vals + N_ext_vals; i++)
+//		{
+//			if ( i < N_ext_vals)
+//			{
+//				outfile << "ext:" << cell.phenotype.secretion.pMicroenvironment->density_names[i] << " ";
+//			}
+//			else if ( i <  2*N_ext_vals)
+//			{
+//				outfile << "int:" << cell.phenotype.secretion.pMicroenvironment->density_names[i-N_ext_vals] << " ";
+//			}
+//			else
+//			{
+//				outfile << "int:" << index_to_substrate_name[i-N_ext_vals+1] << " ";
+//			}
+//		}
+//		outfile << std::endl;
+//		outfile.close();
+		// Testing part end
 	}
 	else
 	{
 		if ( default_microenvironment_options.track_internalized_substrates_in_each_agent )
 		{
-			update_substrate_values(cell.phenotype.molecular.internalized_total_substrates);
+			update_substrate_values(cell.phenotype.molecular.internalized_total_substrates, cell.phenotype.volume.total);
 		}
 	}
 
 	// Combine external and internal substrate values into one large vector and feed it into the ODE Solver
 	int voxel_index = cell.get_current_voxel_index();
-	std::vector<double> internal_substrate_values = substrate_values;
-	std::vector<double> external_substrate_values = (*(cell.phenotype.secretion.pMicroenvironment))(voxel_index);
+	const std::vector<double> external_substrate_values = (*(cell.phenotype.secretion.pMicroenvironment))(voxel_index);
 	// We have to multiply by volume since phenotype gives us only a density
-	double voxel_volume = cell.phenotype.secretion.pMicroenvironment->voxels(voxel_index).volume;
-	external_substrate_values *= voxel_volume;
 
-	// Create a vector of combined substrates to feed into the update function
-	std::vector<double> combined_substrate_values = external_substrate_values;
-	combined_substrate_values.insert(combined_substrate_values.end(), substrate_values.begin(), substrate_values.end());
+	// Update the combined_substrate_values vector
+	for (int i=0; i<N_ext_vals+N_int_vals; i++)
+	{
+		if (i<N_ext_vals)
+		{
+			combined_substrate_values[i] = external_substrate_values[i];
+		}
+		else
+		{
+			combined_substrate_values[i] = substrate_values[i-N_ext_vals];
+		}
+	}
 
 	// Actually integrate the RHS of the equation
-	size_t steps = integrate( update_RHS , combined_substrate_values , PhysiCell_globals.current_time , PhysiCell_globals.current_time + diffusion_dt , intracellular_dt );
+	size_t steps = integrate( RHS_definition, combined_substrate_values, t, t + diffusion_dt, intracellular_dt );
 
 	// Split the combined vector into the internal and external part and update parameters
-	substrate_values = std::vector<double>(combined_substrate_values.begin()+N_ext_vals ,combined_substrate_values.end());
+	for (int i=N_ext_vals; i<N_int_vals+N_ext_vals; i++)
+	{
+		substrate_values[i-N_ext_vals] = combined_substrate_values[i];
+	}
+//	substrate_values = std::vector<double>(combined_substrate_values.begin()+N_ext_vals ,combined_substrate_values.end());
 	std::vector<double> external_change(combined_substrate_values.begin(), combined_substrate_values.begin()+N_ext_vals);
 	external_change -= external_substrate_values;
+
+ 	// Just for testing
+//	std::ofstream outfile;
+//	outfile.precision(20);
+//	std::string filename = "output/logs_" + std::to_string(cell.ID) + ".txt";
+//	outfile.open(filename, std::ios_base::app); // append instead of overwrite
+//	outfile << PhysiCell_globals.current_time + diffusion_dt << " " << steps << " " << combined_substrate_values << std::endl;
+//	outfile.close();
+	// Testing part end
 
 	// Update newly calculated parameters
 	if ( default_microenvironment_options.track_internalized_substrates_in_each_agent )
 	{
-		update_internalized_substrates(cell.phenotype.molecular.internalized_total_substrates);
+		update_internalized_substrates(cell.phenotype.molecular.internalized_total_substrates, cell.phenotype.volume.total);
 	}
 
-	// Update external values and divide by voxel volume
-
-	(*(cell.phenotype.secretion.pMicroenvironment))(voxel_index) += external_change;
+	// Update external values
+	(*cell.phenotype.molecular.pMicroenvironment)(voxel_index) += external_change;
 	return;
 }
 
-void OdeSolverIntracellular::update_internalized_substrates(std::vector<double> &internalized_substrates)
+void OdeSolverIntracellular::update_internalized_substrates(std::vector<double> &internalized_substrates, const double cell_volume)
 {
 	if ( N_ext_vals == internalized_substrates.size() )
 	{
-		internalized_substrates = std::vector<double>(substrate_values.begin(), substrate_values.begin()+N_ext_vals);
+		for (int i=0; i<N_ext_vals; i++)
+		{
+			internalized_substrates[i] = substrate_values[i];
+			internalized_substrates[i] *= cell_volume;
+		}
+//		internalized_substrates = std::vector<double>(substrate_values.begin(), substrate_values.begin()+N_ext_vals);
+//		internalized_substrates *= cell_volume;
 	}
 	else
 	{
@@ -227,29 +293,19 @@ void OdeSolverIntracellular::update_internalized_substrates(std::vector<double> 
 	return;
 }
 
-void OdeSolverIntracellular::update_substrate_values(std::vector<double> &internalized_substrates)
+void OdeSolverIntracellular::update_substrate_values(std::vector<double> &internalized_substrates, const double cell_volume)
 {
-	std::vector<double> only_internal_vals = std::vector<double>(substrate_values.begin()+N_ext_vals, substrate_values.end());
-	if ( only_internal_vals.size() != N_int_vals-N_ext_vals )
+	for (int i=0; i<N_ext_vals; i++)
 	{
-		std::cout << __FUNCTION__ << ": ERROR: pure internal values does not match size" << std::endl;
-		throw std::exception();
+		substrate_values[i] = internalized_substrates[i];
+		substrate_values[i] /= cell_volume;
 	}
-	substrate_values = internalized_substrates;
-	substrate_values.insert(substrate_values.end(), only_internal_vals.begin(), only_internal_vals.end());
 	return;
 }
 
 bool OdeSolverIntracellular::need_update()
 {
-	if( *update_RHS == NULL )
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	return RHS_definition.initialized;
 }
 
 // solve the intracellular model
@@ -264,21 +320,16 @@ double OdeSolverIntracellular::get_parameter_value(std::string name)
 	return substrate_values[substrate_name_to_index[name]];
 }
 
-double OdeSolverIntracellular::get_parameter_value(int index)
-{
-	return substrate_values[index];
-}
-
 // rwh: might consider doing a multi-[species_name, value] "set" method
-void OdeSolverIntracellular::set_parameter_value(std::string species_name, double value)
+void OdeSolverIntracellular::set_parameter_value(std::string name, double value)
 {
-	substrate_values[species_name_to_index[species_name]] = value;
+	RHS_definition.set_parameter(name, value);
     return;
 }
 
-void OdeSolverIntracellular::set_parameter_value(int index, double value)
+void OdeSolverIntracellular::set_parameter_value(int id, double value)
 {
-	substrate_values[index] = value;
+	RHS_definition.set_parameter(id, value);
     return;
 }
 
@@ -328,8 +379,3 @@ int OdeSolverIntracellular::create_custom_data_for_SBML(Phenotype& phenotype)
 }
 
 // ================  specific to "odeSolver" ================
-void OdeSolverIntracellular::setUpdateFunction(update_func update_RHS_func)
-{
-	update_RHS = update_RHS_func;
-	return;
-}

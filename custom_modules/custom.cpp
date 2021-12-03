@@ -107,9 +107,27 @@ void create_cell_types( void )
 
 	// Set the update RHS rule for the default cell definition
 	// This NEEDS to be done after Intracellular was initialized by the xml file!
-	cell_defaults.phenotype.intracellular->setUpdateFunction(update_RHS_custom_custom_cell);
+
+	define_cell_parameters();
+//	cell_defaults.phenotype.intracellular->setRHS(RHS_definition);
 
 	return; 
+}
+
+void define_cell_parameters( void )
+{
+	cell_defaults.phenotype.intracellular->set_parameter_value(1, parameters.doubles("k1"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(2, parameters.doubles("k2"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(3, parameters.doubles("k3"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(4, parameters.doubles("k4"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(5, parameters.doubles("k5"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(6, parameters.doubles("k6"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(7, parameters.doubles("k7"));
+
+	cell_defaults.phenotype.intracellular->set_parameter_value(8, parameters.doubles("secretion_activator"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(9, parameters.doubles("secretion_inhibitor"));
+
+	return;
 }
 
 void setup_microenvironment( void )
@@ -225,39 +243,27 @@ void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, co
 	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
 	std::vector<double> result(X.size(),0);
 
-	for ( int i=0; i<N_external + N_internal; i++ ) {
-		if ( i< N_external )
-		{
-			result[i] = (int_val[i]-ext_val[i]);
-		}
-		else
-		{
-			result[i] = 100.0 + i*20 - X[i];
-		}
-	}
-	dX = result;
-	return;
-}
+//	const double k1 = parameters.doubles("k1");
+//	const double k2 = parameters.doubles("k2");
+//	const double k3 = parameters.doubles("k3");
+//	const double k4 = parameters.doubles("k4");
+//	const double k5 = parameters.doubles("k5");
+//	const double k6 = parameters.doubles("k6");
+//	const double k7 = parameters.doubles("k7");
+//
+//	const double secr_act = parameters.doubles("secretion_activator");
+//	const double secr_inh = parameters.doubles("secretion_inhibitor");
 
-void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double t)
-{
-	int N_external = microenvironment.density_names.size();
-	int N_internal = X.size() - N_external;
-	std::vector<double> ext_val(X.begin() ,X.begin()+N_external);
-	std::vector<double> int_val(X.begin()+N_external, X.begin()+2*N_external);
-	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
-	std::vector<double> result(X.size(),0);
+	const double k1 = 0.1;
+	const double k2 = 5;
+	const double k3 = 12;
+	const double k4 = 5;
+	const double k5 = 0.02;
+	const double k6 = 1;
+	const double k7 = 11;
 
-	double k1 = parameters.doubles("k1");
-	double k2 = parameters.doubles("k2");
-	double k3 = parameters.doubles("k3");
-	double k4 = parameters.doubles("k4");
-	double k5 = parameters.doubles("k5");
-	double k6 = parameters.doubles("k6");
-	double k7 = parameters.doubles("k7");
-
-	double secr_act = parameters.doubles("secretion_activator");
-	double secr_inh = parameters.doubles("secretion_inhibitor");
+	const double secr_act = 0.5;
+	const double secr_inh = 0.5;
 
 	for ( int i=0; i<X.size(); i++ ) {
 		// This changes the external values
@@ -281,6 +287,65 @@ void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<dou
 			else if ( i == 1 )
 			{
 				result[i] = k6 * pow(ext_val[0],2) - k7*int_val[1];
+			}
+		}
+	}
+	dX = result;
+	return;
+}
+
+void update_RHS_null(const std::vector<double> &X, std::vector<double> &dX, const double t)
+{
+	dX = std::vector<double>(dX.size(),0);
+	return;
+}
+
+void update_RHS_testing(const std::vector<double> &X, std::vector<double> &dX, const double t)
+{
+	int N_external = microenvironment.density_names.size();
+	int N_internal = X.size() - N_external;
+//	std::vector<double> ext_val(X.begin() ,X.begin()+N_external);
+//	std::vector<double> int_val(X.begin()+N_external, X.begin()+2*N_external);
+//	std::vector<double> int_val_pure(X.begin()+2*N_external, X.end());
+	std::vector<double> result(X.size(),0);
+
+	const double k1 = parameters.doubles("k1");
+	const double k2 = parameters.doubles("k2");
+	const double k3 = parameters.doubles("k3");
+	const double k4 = parameters.doubles("k4");
+	const double k5 = parameters.doubles("k5");
+//	double k6 = parameters.doubles("k6");
+//	double k7 = parameters.doubles("k7");
+//
+//	double secr_act = parameters.doubles("secretion_activator");
+//	double secr_inh = parameters.doubles("secretion_inhibitor");
+
+	for ( int i=0; i<X.size(); i++ ) {
+		// This changes the external values
+		if ( i< N_external )
+		{
+			if ( i == 0)
+			{
+//				result[i] = -secr_act * (ext_val[i]-int_val[i]);
+				result[i] = X[i+1];
+			}
+			else if ( i == 1)
+			{
+//				result[i] = -secr_inh * (ext_val[i]-int_val[i]);
+				result[i] = -pow(k5,2)*X[i-1];
+			}
+		}
+		// This changes internal and pure internal values
+		else
+		{
+			if ( i - N_external == 0 ){
+//				result[i] = k1 - k2 * pow(int_val[0],2) - k3 * pow(int_val[0],2) / (k4*int_val[1]+k5);
+				result[i] = k1*(k2 - X[i]);
+			}
+			else if ( i - N_external == 1 )
+			{
+//				result[i] = k6 * pow(ext_val[0],2) - k7*int_val[1];
+				result[i] = k3*(k4 - X[i]);
 			}
 		}
 	}

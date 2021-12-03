@@ -228,15 +228,6 @@ int main( int argc, char* argv[] )
 			*/
             
             double time_since_last_intracellular = PhysiCell_globals.current_time - last_intracellular_time;
-            
-            //update_intracellular();
-            
-//            if( PhysiCell_globals.current_time >= next_intracellular_update )
-//            {
-//            	update_intracellular();
-//
-//                next_intracellular_update += intracellular_dt;
-//            }
 
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
