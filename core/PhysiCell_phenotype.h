@@ -546,7 +546,6 @@ class Molecular
 		
 };
 
-typedef void (*update_func)(const std::vector<double> &X, std::vector<double> &dX, const double dt);
 
 class Intracellular
 {
@@ -601,8 +600,9 @@ class Intracellular
 
     // ================  specific to "odeSolver" ================
 	// This functions defines the update Function for the RHS of the ODE
-    virtual void setUpdateFunction(update_func update_RHS_func) = 0;
-    virtual void update_Cell_parameters(Cell &cell) = 0;
+    virtual void update_Cell_parameters(Cell &cell, double t, double diffusion_dt) = 0;
+    virtual void set_parameter_value(int id, double value) = 0;
+
 };
 
 class Phenotype
