@@ -8,8 +8,8 @@ output_dir = "./logs_V"
 project_name = "secretion_project"
 
 # Define parameters to benchmark against
-thread_configs = [1,2,4,8,12,16]
-cell_configs = [25, 36, 49, 64, 81, 100, 121, 144, 225, 400, 625, 900, 1225, 1600, 2025, 2500]
+thread_configs = [1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44]
+cell_configs = [25, 36, 49, 64, 81, 100, 121, 144, 225, 400, 625, 900, 1225, 1600, 2025, 2500, 3025, 3600, 4225, 4900, 5625, 6400, 7225, 8100, 9025, 10000]
 
 # Determines the number of runs over which to average
 N_runs = 2
