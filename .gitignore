@@ -8,3 +8,4 @@ output/*
 build/*.o
 secretion_project
 .project
+log*
