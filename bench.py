@@ -19,7 +19,7 @@ total_runs = N_runs*len(thread_configs)*len(cell_configs)
 pr_buff = 12
 tabs = 3
 # Counts the number of processes finished
-i = 1
+runs_done = 1
 
 # The final line of the project gives us the time it took to complete.
 # This can be parsed by this simple function.
@@ -46,9 +46,9 @@ def setParameters(xml_f, n_cells, num_threads):
 	# Write to the file
 	tree.write(xml_f)
 
-def benchmarkProject(runs, filename):
+def benchmarkProject(runs, filename, runs_done):
 	for j in range(runs):
-		print(2*tabs*" " + "[" + str(i) + "/" + str(total_runs) + "]" + (pr_buff-2*tabs-len(str(total_runs))-len(str(i)))*" " + " Writing to file " + filename)
+		print(2*tabs*" " + "[" + str(runs_done) + "/" + str(total_runs) + "]" + (pr_buff-2*tabs-len(str(total_runs))-len(str(runs_done)))*" " + " Writing to file " + filename)
 		os.system("./" + project_name + " >> " + filename)
 
 		# Open the corresponding logfile (only reading)
@@ -64,7 +64,7 @@ def benchmarkProject(runs, filename):
 				foundit = False
 			if "Total simulation runtime: " in line:
 				foundit = True
-		i += 1
+		runs_done += 1
 	return times
 
 def writeSummary(times, threads, cells):
@@ -96,7 +96,7 @@ def checkIfDirComplete(dir):
 	# If it does not exist, create it and return false to start calculations
 	else:
 		print("Creating directory " + dir)
-		# os.mkdir(dir)
+		os.mkdir(dir)
 		return False
 
 c_j = 0
@@ -117,8 +117,8 @@ for m, cells in enumerate(cell_configs):
 		# This assumes previous calculations already created the file and need not be computed again
 		if os.path.isfile(filename):
 			existed = True
-			print("Already finished job " + str(i) + "/" + str(N_runs*len(thread_configs)*len(cell_configs)))
-			i += N_runs
+			print("Already finished job " + str(runs_done) + "/" + str(N_runs*len(thread_configs)*len(cell_configs)))
+			runs_done += N_runs
 		else:
 			existed = False
 			# Sets the parameters for the next benchmark runs
@@ -128,7 +128,7 @@ for m, cells in enumerate(cell_configs):
 			print(tabs*" " + "[" + str(n+1) + "/" + str(len(thread_configs)) + "]" + (pr_buff-tabs-len(str(len(thread_configs)))-len(str(n)))*" " + " Using " + str(threads) + "/" + str(thread_configs[-1]) + " threads")
 
 			# Also display messages for every run over which is averaged
-			times = benchmarkProject(N_runs, filename)
+			times = benchmarkProject(N_runs, filename, runs_done)
 
 			# Write to summary file
 			writeSummary(times, threads, cells)
