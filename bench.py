@@ -65,7 +65,7 @@ def benchmarkProject(runs, filename, runs_done):
 			if "Total simulation runtime: " in line:
 				foundit = True
 		runs_done += 1
-	return times
+	return times, runs_done
 
 def writeSummary(times, threads, cells):
 	summary.write("Results for Configuration:\n")
@@ -128,7 +128,7 @@ for m, cells in enumerate(cell_configs):
 			print(tabs*" " + "[" + str(n+1) + "/" + str(len(thread_configs)) + "]" + (pr_buff-tabs-len(str(len(thread_configs)))-len(str(n)))*" " + " Using " + str(threads) + "/" + str(thread_configs[-1]) + " threads")
 
 			# Also display messages for every run over which is averaged
-			times = benchmarkProject(N_runs, filename, runs_done)
+			times, runs_done = benchmarkProject(N_runs, filename, runs_done)
 
 			# Write to summary file
 			writeSummary(times, threads, cells)
