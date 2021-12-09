@@ -1067,7 +1067,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		}
 
 		// don't bother computing z component if there is no z-directoin
-		#pragma omp if( mesh.z_coordinates.size() == 1 )
+		if( mesh.z_coordinates.size() == 1 )
 		{
 			#pragma omp for
 			for( unsigned int j=0; j < mesh.y_coordinates.size() ; j++ )
