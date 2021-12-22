@@ -239,6 +239,9 @@
      	<k7 type="double" units="none" description="parameter in act-inh-reaction">11</k7>
      	<secretion_activator type="double" units="none" description="secretion parameter between act_int and act_ext">0.5</secretion_activator>
      	<secretion_inhibitor type="double" units="none" description="secretion parameter between inh_int and inh_ext">0.5</secretion_inhibitor>
+     	
+	<!-- Choose between 0 and 1 -->
+	<space_seperation type="double" units="none" description="cell distance relative to Domain size">0.5</space_seperation>
 	</user_parameters>
 	
 </PhysiCell_settings>

@@ -67,6 +67,7 @@
 
 #include "./custom.h"
 #include "../BioFVM/BioFVM.h"  
+#include <math.h>
 using namespace BioFVM;
 
 
@@ -164,7 +165,13 @@ void setup_tissue( void )
 	double Yrange = Ymax - Ymin;
 	double Zrange = Zmax - Zmin;
 
-	double XYRatio = Xrange/Yrange;
+	double X_offset = Xrange/2.0*(parameters.doubles("space_seperation"));
+	double Y_offset = Yrange/2.0*(parameters.doubles("space_seperation"));
+
+	double Xrange_reduced = Xrange-2*X_offset;
+	double Yrange_reduced = Yrange-2*Y_offset;
+
+	double XYRatio = Xrange_reduced/Yrange_reduced;
 	int N_cells = parameters.ints("number_of_cells");
 	int N_X = round(sqrt(N_cells*XYRatio));
 	int N_Y = round(sqrt(N_cells/XYRatio));
@@ -183,8 +190,8 @@ void setup_tissue( void )
 			for ( int m = 1 ; m <= N_Y ; m++ ) {
 			{
 				std::vector<double> position = {0,0,0};
-				position[0] = Xmin + Xrange * n / (N_X+1);
-				position[1] = Ymin + Yrange * m / (N_Y+1);
+				position[0] = Xmin + X_offset + Xrange_reduced * n / (N_X+1);
+				position[1] = Ymin + Y_offset + Yrange_reduced * m / (N_Y+1);
 				position[2] = 0;
 
 				pC = create_cell( *pCD );
