@@ -961,7 +961,6 @@ std::vector<gradient>& Microenvironment::nearest_gradient_vector( std::vector<do
 
 void Microenvironment::compute_all_gradient_vectors( void )
 {
-	printf("%f [Single] Calculating Gradients\n");
 	static double two_dx = mesh.dx; 
 	static double two_dy = mesh.dy; 
 	static double two_dz = mesh.dz; 
