@@ -111,10 +111,10 @@ void OdeSolverIntracellular::initialize_intracellular_from_pugixml(pugi::xml_nod
 		if ( initial_value )
 		{
 			init_val = xml_get_my_double_value(initial_value);
-			std::cout << "              "  << __FUNCTION__ << ": initial_condition = " << substrate_values[ID] << std::endl;
+			std::cout << "              "  << __FUNCTION__ << ": initial_condition = " << init_val << std::endl;
 		} else {
 			init_val = 0;
-			std::cout << "              "  << __FUNCTION__ << ": initial_condition = " << substrate_values[ID] << " (undefined: auto-assign)" << std::endl;
+			std::cout << "              "  << __FUNCTION__ << ": initial_condition = " << init_val << " (undefined: auto-assign)" << std::endl;
 		}
 		if (ID > substrate_values.size())
 		{
@@ -226,7 +226,6 @@ void OdeSolverIntracellular::update_Cell_parameters(PhysiCell::Cell &cell, doubl
 	// Combine external and internal substrate values into one large vector and feed it into the ODE Solver
 	int voxel_index = cell.get_current_voxel_index();
 	const std::vector<double> external_substrate_values = (*(cell.phenotype.secretion.pMicroenvironment))(voxel_index);
-	// We have to multiply by volume since phenotype gives us only a density
 
 	// Update the combined_substrate_values vector
 	for (int i=0; i<N_ext_vals+N_int_vals; i++)
