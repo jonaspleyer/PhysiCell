@@ -316,13 +316,33 @@ void OdeSolverIntracellular::update()
 
 double OdeSolverIntracellular::get_parameter_value(std::string name)
 {
-	return substrate_values[substrate_name_to_index[name]];
+	if ( name.at(0) == '.' )
+	{
+		int ID = std::stoi(name.substr(1));
+		if ( ID < substrate_values.size() )
+		{
+			return substrate_values[ID];
+		} else {
+			return -1;
+		}
+	} else {
+		return substrate_values[substrate_name_to_index[name]];
+	}
 }
 
 // rwh: might consider doing a multi-[species_name, value] "set" method
 void OdeSolverIntracellular::set_parameter_value(std::string name, double value)
 {
-	RHS_definition.set_parameter(name, value);
+	if ( name.at(0) == '.' )
+	{
+		int ID = std::stoi(name.substr(1));
+		if ( ID < substrate_values.size() )
+		{
+			substrate_values[ID] = value;
+		}
+	} else {
+		RHS_definition.set_parameter(name, value);
+	}
     return;
 }
 
