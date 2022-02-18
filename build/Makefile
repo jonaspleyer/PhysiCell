@@ -128,7 +128,7 @@ custom.o: ../custom_modules/custom.cpp
 #librr_intracellular.o: ../addons/libRoadrunner/src/librr_intracellular.cpp ../addons/libRoadrunner/src/librr_intracellular.h
 #	$(COMPILE_COMMAND) -c ../addons/libRoadrunner/src/librr_intracellular.cpp
 
-ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h
+ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h RHS.o
 	$(COMPILE_COMMAND) -c ../addons/OdeSolver/ode_solver_intracellular.cpp
 
 RHS.o: ../custom_modules/RHS.cpp ../custom_modules/RHS.h
