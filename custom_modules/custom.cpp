@@ -78,6 +78,34 @@ using namespace BioFVM;
 // #include "rrc_utilities.h"
 //extern "C" rrc::RRHandle createRRInstance();
 
+void chemotaxis_bias_function( Cell* pCell, Phenotype& phenotype , double dt )
+{
+	// quickly find O2
+	static int activator_index = microenvironment.find_density_index( "activator" );
+	// sample O2
+	double density = pCell->nearest_density_vector()[activator_index];
+
+	// set direction along activator gradients
+	phenotype.motility.migration_bias_direction = pCell->nearest_gradient(activator_index);
+	normalize( &( phenotype.motility.migration_bias_direction ) );
+	// set speed proportional to activator, scaled by normoxic O2 ( 160 mmHg);
+	// with a maximum of 1.2 micron per minute
+	const double max_val = parameters.doubles("max_activator_value");
+	const double min_val = parameters.doubles("min_activator_value");
+
+	double theta = pow((max_val - density) / (max_val-min_val),2.0);
+	phenotype.motility.migration_speed = 0.1*theta;
+
+	if( phenotype.motility.migration_speed > 0.1 ) {
+		phenotype.motility.migration_speed = 0.1;
+	}
+	// the greater the oxygen, the more biased the motion
+	//phenotype.motility.migration_bias = theta;
+
+	return;
+}
+
+
 void create_cell_types( void )
 {
 	// set the random seed 
@@ -103,7 +131,21 @@ void create_cell_types( void )
 	/*
 	   This parses the cell definitions in the XML config file. 
 	*/
+
 	initialize_cell_definitions_from_pugixml(); 
+
+	Cell_Definition* motil_cell = cell_definitions_by_name["motil_cell"];
+
+	motil_cell->functions.volume_update_function = standard_volume_update_function;
+	motil_cell->functions.update_velocity = standard_update_cell_velocity;
+
+	motil_cell->functions.update_migration_bias = chemotaxis_bias_function;
+	motil_cell->functions.update_phenotype = NULL;
+	motil_cell->functions.custom_cell_rule = NULL;//slowly_kill_cell_if_further_away;
+
+	motil_cell->functions.add_cell_basement_membrane_interactions = NULL;
+	motil_cell->functions.calculate_distance_to_membrane = NULL;
+
 
 	build_cell_definitions_maps();
 	display_cell_definitions( std::cout );

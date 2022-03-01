@@ -225,6 +225,74 @@
             <custom_data>
 			</custom_data>
 		</cell_definition>
+		
+		
+		
+		<cell_definition name="motil_cell" ID="1">
+			<phenotype>
+				<cycle code="5" name="live">  
+					
+					<transition_rates units="1/min"> 
+						<rate start_index="0" end_index="0" fixed_duration="false">0</rate>
+					</transition_rates>
+				</cycle>			
+				<death>  
+					<model code="100" name="apoptosis"> 
+						<death_rate units="1/min">5e-6</death_rate>
+					</model> 
+					<model code="101" name="necrosis">
+						<death_rate units="1/min">0.0</death_rate>
+					</model> 
+				</death>					
+				<volume>  
+					<total units="micron^3">1000</total>
+					<fluid_change_rate units="1/min">0.0</fluid_change_rate>
+					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
+					<nuclear units="micron^3">700</nuclear>
+                    
+					<fluid_change_rate units="1/min">0.5</fluid_change_rate>
+					<cytoplasmic_biomass_change_rate units="1/min">0.045</cytoplasmic_biomass_change_rate>
+					<nuclear_biomass_change_rate units="1/min">0.55</nuclear_biomass_change_rate>
+					
+					<calcified_fraction units="dimensionless">0</calcified_fraction>
+					<calcification_rate units="1/min">0</calcification_rate>
+					
+					<relative_rupture_volume units="dimensionless">2.0</relative_rupture_volume>
+				</volume> 				
+                
+				<motility> 
+                	<speed units="micron/min">0.1</speed>
+					<persistence_time units="min">5</persistence_time>
+					<migration_bias units="dimensionless">0.4</migration_bias>
+
+                    <options>
+						<enabled>true</enabled>
+						<use_2D>true</use_2D>
+						<chemotaxis>
+							<enabled>false</enabled>
+							<substrate>activator</substrate>
+							<direction>1</direction>
+						</chemotaxis>
+					</options>
+				</motility>
+
+				<secretion>
+                    <substrate name="activator">
+						<secretion_rate units="1/min">0.0</secretion_rate>
+						<secretion_target units="substrate density">0.0</secretion_target>
+						<uptake_rate units="1/min">0.0</uptake_rate>
+						<net_export_rate units="total substrate/min">0</net_export_rate> 
+                    </substrate> 
+					<substrate name="inhibitor">
+						<secretion_rate units="1/min">0.00</secretion_rate>
+						<secretion_target units="substrate density">0</secretion_target>
+						<uptake_rate units="1/min">0.0</uptake_rate>
+						<net_export_rate units="total substrate/min">0</net_export_rate>
+                    </substrate>
+				</secretion>
+			</phenotype>
+		</cell_definition>
+		
     </cell_definitions>
 	
 	<user_parameters>
