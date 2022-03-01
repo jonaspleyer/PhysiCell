@@ -90,3 +90,5 @@ void define_cell_parameters ( void );
 void update_RHS_custom(const std::vector<double> &X, std::vector<double> &dX, const double dt);
 void update_RHS_custom_custom_cell(const std::vector<double> &X, std::vector<double> &dX, const double dt);
 void update_RHS_new(const std::vector<double> &X, std::vector<double> &dX, const double dt);
+
+void change_production_parameter(const double time);

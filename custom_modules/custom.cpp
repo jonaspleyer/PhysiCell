@@ -177,12 +177,11 @@ void define_cell_parameters( void )
 	cell_defaults.phenotype.intracellular->set_parameter_value(2, parameters.doubles("k2"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(3, parameters.doubles("k3"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(4, parameters.doubles("k4"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(5, parameters.doubles("k5"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(6, parameters.doubles("k6"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(7, parameters.doubles("k7"));
 
 	cell_defaults.phenotype.intracellular->set_parameter_value(8, parameters.doubles("secretion_activator"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(9, parameters.doubles("secretion_inhibitor"));
+
+	cell_defaults.phenotype.intracellular->set_parameter_value(20, 1.0);
 
 	return;
 }
@@ -200,6 +199,13 @@ void setup_microenvironment( void )
 	
 	return; 
 }
+
+
+double get_frequency_perturbation( std::vector<double> position, double magnitude, double frequency, double x_phase=0, double y_phase=0 )
+{
+	return 1 + (magnitude-1)*cos(frequency*position[0] + x_phase)*cos(frequency*position[1] + y_phase);
+}
+
 
 void setup_tissue( void )
 {
@@ -221,11 +227,11 @@ void setup_tissue( void )
 	double Yrange = Ymax - Ymin;
 	double Zrange = Zmax - Zmin;
 
-	double X_offset = Xrange/2.0*(parameters.doubles("space_seperation"));
-	double Y_offset = Yrange/2.0*(parameters.doubles("space_seperation"));
+	double X_offset = 0;//Xrange/2.0*(parameters.doubles("space_seperation"));
+	double Y_offset = 0;//Yrange/2.0*(parameters.doubles("space_seperation"));
 
-	double Xrange_reduced = Xrange-2*X_offset;
-	double Yrange_reduced = Yrange-2*Y_offset;
+	double Xrange_reduced = Xrange;//-2*X_offset;
+	double Yrange_reduced = Yrange*(1-parameters.doubles("space_seperation"));//-2*Y_offset;
 
 	double XYRatio = Xrange_reduced/Yrange_reduced;
 	int N_cells = parameters.ints("number_of_cells");
@@ -236,11 +242,11 @@ void setup_tissue( void )
 	
 	Cell* pC;
 	
-	for( int k=0; k < cell_definitions_by_index.size() ; k++ )
+	int cell_definition_index = 0;
 	{
-		Cell_Definition* pCD = cell_definitions_by_index[k];
-		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl;
-		std::cout << "Placing " << N_X << " x " << N_Y << " cells" << std::endl;
+		Cell_Definition* pCD = cell_definitions_by_index[cell_definition_index];
+		std::cout << "Placing cells of type " << pCD->name << std::endl;
+		std::cout << "Placing " << N_X << " x " << N_Y << " = " << N_X*N_Y << " cells" << std::endl;
 
 		for( int n = 1 ; n <= N_X ; n++ )
 			for ( int m = 1 ; m <= N_Y ; m++ ) {
@@ -253,9 +259,35 @@ void setup_tissue( void )
 				pC = create_cell( *pCD );
 				pC->assign_position( position );
 				pC->phenotype.intracellular->start();
+
+				// Now we initialize with a frequency perturbation
+				// double value = get_frequency_perturbation( position, parameters.doubles("magnitude"), parameters.doubles("initial_mode"), 0, 0);
+				double value = 1+(parameters.doubles("magnitude")-1)*UniformRandom();
+//				double value = 1 + (parameters.doubles("magnitude")-1)*UniformRandom();
+				double dens_val = pC->phenotype.intracellular->get_parameter_value(".0");
+				pC->phenotype.intracellular->set_parameter_value(".0", value*dens_val);
+				// microenvironment(n-1,  m-1,  0)*=value;
+				microenvironment.nearest_density_vector(position) *= value;
 			}
 		}
 	}
+
+	cell_definition_index=1;
+	int N_free_cells = parameters.ints("free_cells");
+	Cell_Definition* pCD = cell_definitions_by_index[cell_definition_index];
+	std::cout << "Placing cells of type " << pCD->name << std::endl;
+	std::cout << "Placing " << N_free_cells << " free cells " << std::endl;
+
+	for ( int n = 1; n<= N_free_cells; n++ ) {
+		std::vector<double> position = {0,0,0};
+		position[0] = Xmin + X_offset + UniformRandom()*Xrange_reduced;
+		position[1] = Ymin + Yrange_reduced + UniformRandom()*(Yrange-Yrange_reduced);
+
+		pC = create_cell( *pCD );
+		pC->assign_position( position );
+
+	}
+
 	std::cout << std::endl;
 
 	// load cells from your CSV file (if enabled)
