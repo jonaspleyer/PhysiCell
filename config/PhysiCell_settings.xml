@@ -74,42 +74,42 @@
 
 <PhysiCell_settings version="devel-version">
 	<domain>
-		<x_min>-500</x_min>
-		<x_max>500</x_max>
-		<y_min>-500</y_min>
-		<y_max>500</y_max>
+		<x_min>-1000</x_min>
+		<x_max>1000</x_max>
+		<y_min>-1000</y_min>
+		<y_max>1000</y_max>
 		<z_min>-10</z_min>
 		<z_max>10</z_max>
-		<dx>10</dx>
-		<dy>10</dy>
-		<dz>10</dz>
+		<dx>20</dx>
+		<dy>20</dy>
+		<dz>20</dz>
 		<use_2D>true</use_2D>
 	</domain>
 	
 	<overall>
-		<max_time units="min">3000</max_time>
+		<max_time units="min">720</max_time>
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
-		<dt_diffusion units="min">0.01</dt_diffusion>
+		<dt_diffusion units="min">0.05</dt_diffusion>
 		<dt_mechanics units="min">0.1</dt_mechanics>
-		<dt_phenotype units="min">6</dt_phenotype>	
+		<dt_phenotype units="min">6</dt_phenotype>
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>4</omp_num_threads>
-	</parallel> 
+		<omp_num_threads>40</omp_num_threads>
+	</parallel>
 	
 	<save>
-		<folder>output</folder> <!-- use . for root --> 
+		<folder>output</folder>  
 
 		<full_data>
-			<interval units="min">20</interval>
+			<interval units="min">10</interval>
 			<enable>true</enable>
 		</full_data>
 		
 		<SVG>
-			<interval units="min">20</interval>
+			<interval units="min">10</interval>
 			<enable>true</enable>
 		</SVG>
 		
@@ -120,6 +120,7 @@
 	
 	<options>
 		<legacy_random_points_on_sphere_in_divide>false</legacy_random_points_on_sphere_in_divide>
+		<virtual_wall_at_domain_edge>true</virtual_wall_at_domain_edge>		
 	</options>	
 
 	<microenvironment_setup>
@@ -142,7 +143,7 @@
  		</variable>
 
 		<options>
-			<calculate_gradients>false</calculate_gradients>
+			<calculate_gradients>true</calculate_gradients>
 			<track_internalized_substrates_in_each_agent>true</track_internalized_substrates_in_each_agent>
 			 
 			<initial_condition type="matlab" enabled="false">
@@ -166,17 +167,17 @@
 				</cycle>			
 				<death>  
 					<model code="100" name="apoptosis"> 
-						<death_rate units="1/min">0.0</death_rate>
+						<death_rate units="1/min">5e-6</death_rate>
 					</model> 
 					<model code="101" name="necrosis">
 						<death_rate units="1/min">0.0</death_rate>
 					</model> 
 				</death>					
 				<volume>  
-					<total units="micron^3">2494</total>
+					<total units="micron^3">3500</total>
 					<fluid_change_rate units="1/min">0.0</fluid_change_rate>
 					<fluid_fraction units="dimensionless">0.75</fluid_fraction>
-					<nuclear units="micron^3">540</nuclear>
+					<nuclear units="micron^3">1000</nuclear>
                     
 					<fluid_change_rate units="1/min">0.5</fluid_change_rate>
 					<cytoplasmic_biomass_change_rate units="1/min">0.045</cytoplasmic_biomass_change_rate>
@@ -189,9 +190,19 @@
 				</volume> 				
                 
 				<motility> 
-                	<speed units="micron/min">0.0</speed>
-					<persistence_time units="min">0.0</persistence_time>
-					<migration_bias units="dimensionless">0.0</migration_bias>
+                	<speed units="micron/min">0.05</speed>
+					<persistence_time units="min">5</persistence_time>
+					<migration_bias units="dimensionless">0.1</migration_bias>
+
+                    <options>
+						<enabled>true</enabled>
+						<use_2D>true</use_2D>
+						<chemotaxis>
+							<enabled>true</enabled>
+							<substrate>activator</substrate>
+							<!-- <direction>1</direction> -->
+						</chemotaxis>
+					</options>
 				</motility>
 
 				<secretion>
@@ -312,19 +323,20 @@
      	<secretion_activator type="double" units="none" description="secretion parameter between act_int and act_ext">1</secretion_activator>
      	<secretion_inhibitor type="double" units="none" description="secretion parameter between inh_int and inh_ext">1</secretion_inhibitor>
      	
-     	
-	<space_seperation type="double" units="none" description="cell distance relative to Domain size">0.0</space_seperation>
-	<free_cells type="int" units="none" description="how many moving cells are present in upper domain">0</free_cells>
+        <space_seperation type="double" units="none" description="cell distance relative to Domain size">0.0</space_seperation>
+        <free_cells type="int" units="none" description="how many moving cells are present in upper domain">0</free_cells>
+        <min_activator_value type="double" units="none">5e+2</min_activator_value>
+        <max_activator_value type="double" units="none">3.5e+3</max_activator_value>
 		
-		<opto_step_0 type="double" units="min">    0</opto_step_0>
-		<opto_step_1 type="double" units="min"> 1440</opto_step_1>
-		<opto_step_2 type="double" units="min"> 2880</opto_step_2>
-		<opto_step_3 type="double" units="min"> 4320</opto_step_3>
-		<opto_step_4 type="double" units="min"> 5760</opto_step_4>
-		<opto_production_val_0 type="double" units="min">1.00</opto_production_val_0>
-		<opto_production_val_1 type="double" units="min"> 0.6</opto_production_val_1>
-		<opto_production_val_2 type="double" units="min"> 0.4</opto_production_val_2>
-		<opto_production_val_3 type="double" units="min"> 0.3</opto_production_val_3>
-		<opto_production_val_4 type="double" units="min"> 0.2</opto_production_val_4>
+        <opto_step_0 type="double" units="min">    0</opto_step_0>
+        <opto_step_1 type="double" units="min"> 1440</opto_step_1>
+        <opto_step_2 type="double" units="min"> 2880</opto_step_2>
+        <opto_step_3 type="double" units="min"> 4320</opto_step_3>
+        <opto_step_4 type="double" units="min"> 5760</opto_step_4>
+        <opto_production_val_0 type="double" units="min">1.00</opto_production_val_0>
+        <opto_production_val_1 type="double" units="min"> 0.6</opto_production_val_1>
+        <opto_production_val_2 type="double" units="min"> 0.4</opto_production_val_2>
+        <opto_production_val_3 type="double" units="min"> 0.3</opto_production_val_3>
+        <opto_production_val_4 type="double" units="min"> 0.2</opto_production_val_4>
 	</user_parameters>
 </PhysiCell_settings>

@@ -99,7 +99,6 @@ void RHS::set_parameter(std::string name, double value)
 		initialized = true;
 	}
 	name_to_val[name] = value;
-	std::cout << "Set value " << name << " with " << value << std::endl;
 	return;
 }
 
