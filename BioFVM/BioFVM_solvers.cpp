@@ -384,6 +384,8 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 	
 	M.apply_dirichlet_conditions();
 
+	M.temporary_density_vectors1 = *M.p_density_vectors;
+
 	// x-diffusion 
 	#pragma omp parallel
 	{
@@ -399,7 +401,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 			n += M.thomas_i_jump; 
 			for( unsigned int i=1; i < M.mesh.x_coordinates.size() ; i++ )
 			{
-				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_i_jump] );
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , M.temporary_density_vectors1[n-M.thomas_i_jump] );
 				(*M.p_density_vectors)[n] /= M.thomas_denomx[i];
 				n += M.thomas_i_jump;
 			}
@@ -409,7 +411,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 
 			for( int i = M.mesh.x_coordinates.size()-2 ; i >= 0 ; i-- )
 			{
-				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cx[i] , (*M.p_density_vectors)[n+M.thomas_i_jump] );
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cx[i] , M.temporary_density_vectors1[n+M.thomas_i_jump] );
 				n -= M.thomas_i_jump;
 			}
 		}
@@ -430,7 +432,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 			n += M.thomas_j_jump; 
 			for( unsigned int j=1; j < M.mesh.y_coordinates.size() ; j++ )
 			{
-				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_j_jump] );
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , M.temporary_density_vectors1[n-M.thomas_j_jump] );
 				(*M.p_density_vectors)[n] /= M.thomas_denomy[j];
 				n += M.thomas_j_jump;
 			}
@@ -440,7 +442,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 
 			for( int j = M.mesh.y_coordinates.size()-2 ; j >= 0 ; j-- )
 			{
-				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] );
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , M.temporary_density_vectors1[n+M.thomas_j_jump] );
 				n -= M.thomas_j_jump;
 			}
 		}
