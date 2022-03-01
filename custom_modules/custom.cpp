@@ -67,7 +67,9 @@
 
 #include "./custom.h"
 #include "../BioFVM/BioFVM.h"  
+#include "../core/PhysiCell_cell_container.h"
 #include <math.h>
+#include "./tinycolormap/include/tinycolormap.hpp"
 using namespace BioFVM;
 
 
@@ -211,12 +213,39 @@ void setup_tissue( void )
 std::vector<std::string> my_coloring_function( Cell* pCell )
 {
     // start with flow cytometry coloring 
-	std::vector<std::string> output = false_cell_coloring_cytometry(pCell); 
+	static std::vector< std::string > output( 4 , "rgb(0,0,0)" );
 
-	// color
-    // proliferative cell
-	output[0] = "rgb(20,20,20)";
-	output[2] = "rgb(10,10,10)";
+	if ( pCell->phenotype.death.dead ) {
+		return output;
+	}
 
+	static int motil_cell_id = find_cell_definition( "motil_cell" )->type;
+	if ( pCell->type == motil_cell_id ) {
+		// Outer padding
+		output[1] = "rgb(0,0,0)";
+		// Middle padding
+		output[0] = "rgb(150,50,5)";
+		// Most inner padding
+		output[3] = "rgb(0,0,0)";
+		// Color of core
+		output[2] = "rgb(230,96,55)";
+		return output;
+	}
+
+	static int default_cell_id = find_cell_definition( "default" )->type;
+	int substrate=0;
+//	std::vector<double> boundaries = get_plotting_color_boundary_vals(PhysiCell::all_cells, substrate);
+	const double max_val = parameters.doubles("max_activator_value");
+	const double min_val = parameters.doubles("min_activator_value");
+	double dens = pCell->phenotype.intracellular->get_parameter_value(".0");
+	double value = 1-(max_val - dens - min_val)/(max_val-min_val);
+	const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Viridis);
+
+	if ( pCell->type == default_cell_id ) {
+		output[1] = "rgb(0,0,0)";
+		output[0] = "rgb(" + std::to_string(256*color.r()) + "," + std::to_string(256*color.g()) + "," + std::to_string(256*color.b()) + ")";
+		output[3] = "rgb(0,0,0)";
+		output[2] = "rgb(" + std::to_string(256*color.r()) + "," + std::to_string(256*color.g()) + "," + std::to_string(256*color.b()) + ")";
+	}
 	return output; 
 }
