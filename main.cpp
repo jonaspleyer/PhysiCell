@@ -209,6 +209,8 @@ int main( int argc, char* argv[] )
 				}
 			}
 
+			change_production_parameter(PhysiCell_globals.current_time);
+
 			// update the microenvironment
 			microenvironment.simulate_diffusion_decay( diffusion_dt );
             

@@ -114,15 +114,20 @@ double RHS::P(int id)
 }
 
 //void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
-void RHS::operator() ( const state_type &X , state_type &dX , const double dt )
+void RHS::operator() ( const state_type &X , state_type &dX , const double t )
 {
 	// This changes the external values
-	dX[0] = -P(8) * (X[0]-X[2]);
-	dX[1] = -P(9) * (X[1]-X[3]);
+	// dX[0] = -P(8) * (X[0]-X[2]);
+	// dX[1] = -P(9) * (X[1]-X[3]);
+
+	dX[0] = P(1)*P(20) - P(2)*X[0] + P(3)*pow(X[0],2)*X[1];
+	dX[1] = P(4)*P(20) - P(3)*pow(X[0],2)*X[1];
 
 	// This changes internal and pure internal values
-	dX[2] = P(1) - P(2) * pow(X[2],2) + P(3) * pow(X[2],2) / (P(4)*X[3]+P(5));
-	dX[3] = P(6) * pow(X[2],2) - P(7)*X[3];
+	// dX[2] = P(1) - P(2) * pow(X[2],2) + P(3) * pow(X[2],2) / (P(4)*X[3]+P(5));
+	// dX[3] = P(6) * pow(X[2],2) - P(7)*X[3];
+	dX[2] = -10*(X[2]-X[0]);
+	dX[3] = -10*(X[3]-X[1]);
 
 	// This changes the external values
 

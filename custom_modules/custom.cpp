@@ -106,6 +106,18 @@ void chemotaxis_bias_function( Cell* pCell, Phenotype& phenotype , double dt )
 }
 
 
+void change_production_parameter(const double time) {
+	for (int k=0; k<5; k++) {
+		if ( fabs(time - parameters.doubles("opto_step_" + std::to_string(k))) < diffusion_dt) {
+			double val = parameters.doubles("opto_production_val_" + std::to_string(k));
+			for (int i=0; i<(*all_cells).size(); i++) {
+				(*all_cells)[i]->phenotype.intracellular->set_parameter_value(20, val);
+			}
+			std::cout << "Changing opto production of step" << k << " value to " << val << std::endl;
+		}
+	}
+}
+
 void create_cell_types( void )
 {
 	// set the random seed 

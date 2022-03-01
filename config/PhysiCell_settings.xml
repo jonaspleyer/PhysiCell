@@ -310,6 +310,15 @@
      	
 	<!-- Choose between 0 and 1 -->
 	<space_seperation type="double" units="none" description="cell distance relative to Domain size">0.5</space_seperation>
+		<opto_step_0 type="double" units="min">    0</opto_step_0>
+		<opto_step_1 type="double" units="min"> 1440</opto_step_1>
+		<opto_step_2 type="double" units="min"> 2880</opto_step_2>
+		<opto_step_3 type="double" units="min"> 4320</opto_step_3>
+		<opto_step_4 type="double" units="min"> 5760</opto_step_4>
+		<opto_production_val_0 type="double" units="min">1.00</opto_production_val_0>
+		<opto_production_val_1 type="double" units="min"> 0.6</opto_production_val_1>
+		<opto_production_val_2 type="double" units="min"> 0.4</opto_production_val_2>
+		<opto_production_val_3 type="double" units="min"> 0.3</opto_production_val_3>
+		<opto_production_val_4 type="double" units="min"> 0.2</opto_production_val_4>
 	</user_parameters>
-	
 </PhysiCell_settings>
