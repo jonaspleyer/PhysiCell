@@ -7,6 +7,7 @@ cancer_immune_3D
 output/*
 build/*.o
 secretion_project
+hek293
 .project
 log*
 *.sh
