@@ -1,19 +1,31 @@
 VERSION := $(shell grep . ../VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME := ../secretion_project
+PROGRAM_NAME := ../hek293
+
+MOVIE_NAME = $(mn)
+SPACE := ../../../space
 
 CC := g++
-
 MAKEFLAGS += -j$(($(nproc)-2))
+# CC := g++-mp-7 # typical macports compiler name
+# CC := g++-7 # typical homebrew compiler name 
 
 # Check for environment definitions of compiler 
-# e.g., on CC = g++-10 on OSX
+# e.g., on CC = g++-7 on OSX
 ifdef PHYSICELL_CPP 
 	CC := $(PHYSICELL_CPP)
 endif
 
-ARCH := native # best auto-tuning 
+ARCH := native # best auto-tuning
+# ARCH := core2 # a reasonably safe default for most CPUs since 2007
+# ARCH := corei7
+# ARCH := core-avx-i # i7 ivy bridge or newer 
+# ARCH := core-avx2 # i7 with Haswell or newer
+# ARCH := silvermont
+# ARCH := skylake-avx512
+# ARCH := nocona #64-bit pentium 4 or later 
 
-CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -fopenmp -m64 -std=c++11 -D ADDON_ODE_SOLVER
+# CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
 COMPILE_COMMAND := $(CC) $(CFLAGS) 
 
@@ -21,28 +33,26 @@ BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
 
 PhysiCell_core_OBJECTS := PhysiCell_phenotype.o PhysiCell_cell_container.o PhysiCell_standard_models.o \
-PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o 
+PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o
 
 PhysiCell_module_OBJECTS := PhysiCell_SVG.o PhysiCell_pathology.o PhysiCell_MultiCellDS.o PhysiCell_various_outputs.o \
-PhysiCell_pugixml.o PhysiCell_settings.o
+PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
 
 # put your custom objects here (they should be in the custom_modules directory)
-PhysiCell_custom_module_OBJECTS := custom.o 
+
+PhysiCell_custom_module_OBJECTS := custom.o domain.o light.o control.o optogenetics.o
 
 pugixml_OBJECTS := pugixml.o
 
-ODE_SOLVER_OBJECTS := ode_solver_intracellular.o RHS.o
-
 PhysiCell_OBJECTS := $(BioFVM_OBJECTS)  $(pugixml_OBJECTS) $(PhysiCell_core_OBJECTS) $(PhysiCell_module_OBJECTS)
-ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(ODE_SOLVER_OBJECTS)
+ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
 
-# compile the project 
-
-#all: main.cpp $(ALL_OBJECTS)
-#	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
+EXAMPLES := ../examples/PhysiCell_test_mechanics_1.cpp ../examples/PhysiCell_test_mechanics_2.cpp \
+ ../examples/PhysiCell_test_DCIS.cpp ../examples/PhysiCell_test_HDS.cpp \
+ ../examples/PhysiCell_test_cell_cycle.cpp ../examples/PhysiCell_test_volume.cpp 
 
 all: ../main.cpp $(ALL_OBJECTS)
-	$(COMPILE_COMMAND) $(OMP_LIB) -o $(PROGRAM_NAME) $(ALL_OBJECTS) ../main.cpp
+	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) ../main.cpp 
 
 # PhysiCell core components	
 
@@ -115,41 +125,40 @@ PhysiCell_MultiCellDS.o: ../modules/PhysiCell_MultiCellDS.cpp
 
 PhysiCell_various_outputs.o: ../modules/PhysiCell_various_outputs.cpp
 	$(COMPILE_COMMAND) -c ../modules/PhysiCell_various_outputs.cpp
-
+	
 PhysiCell_pugixml.o: ../modules/PhysiCell_pugixml.cpp
 	$(COMPILE_COMMAND) -c ../modules/PhysiCell_pugixml.cpp
 	
 PhysiCell_settings.o: ../modules/PhysiCell_settings.cpp
-	$(COMPILE_COMMAND) -c ../modules/PhysiCell_settings.cpp
+	$(COMPILE_COMMAND) -c ../modules/PhysiCell_settings.cpp	
 	
-custom.o: ../custom_modules/custom.cpp 
+PhysiCell_basic_signaling.o: ../core/PhysiCell_basic_signaling.cpp
+	$(COMPILE_COMMAND) -c ../core/PhysiCell_basic_signaling.cpp 
+
+PhysiCell_geometry.o: ../modules/PhysiCell_geometry.cpp
+	$(COMPILE_COMMAND) -c ../modules/PhysiCell_geometry.cpp 
+
+# user-defined PhysiCell modules
+custom.o: ../custom_modules/custom.cpp
 	$(COMPILE_COMMAND) -c ../custom_modules/custom.cpp
+	
+domain.o: ../custom_modules/domain.cpp 
+	$(COMPILE_COMMAND) -c ../custom_modules/domain.cpp
+	
+control.o: ../custom_modules/control.cpp 
+	$(COMPILE_COMMAND) -c ../custom_modules/control.cpp
+	
+light.o: ../custom_modules/light.cpp 
+	$(COMPILE_COMMAND) -c ../custom_modules/light.cpp
 
-#librr_intracellular.o: ../addons/libRoadrunner/src/librr_intracellular.cpp ../addons/libRoadrunner/src/librr_intracellular.h
-#	$(COMPILE_COMMAND) -c ../addons/libRoadrunner/src/librr_intracellular.cpp
+optogenetics.o: ../custom_modules/optogenetics.cpp 
+	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics.cpp
 
-ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h RHS.o
-	$(COMPILE_COMMAND) -c ../addons/OdeSolver/ode_solver_intracellular.cpp
-
-RHS.o: ../custom_modules/RHS.cpp ../custom_modules/RHS.h
-	$(COMPILE_COMMAND) -c ../custom_modules/RHS.cpp
 
 # cleanup
-	
-clean:
-	rm -f *.o
-	rm -f $(PROGRAM_NAME)*
-	
-data-cleanup:
-	rm -f *.mat
-	rm -f *.xml
-	rm -f *.svg
-	rm -rf ../output
-	mkdir ../output
-	touch ../output/empty.txt
 
 reset:
-	rm -f *.cpp 
+	rm -f *.cpp PhysiCell_cell.o
 	cp ../sample_projects/Makefile-default Makefile 
 	rm -f ../custom_modules/*
 	touch ../custom_modules/empty.txt 
@@ -160,16 +169,26 @@ reset:
 	touch ../config/empty.csv
 	rm ../config/*.csv	
 	
-FOLDER := output
-FRAMERATE := 24
-movie:
-#	mencoder "mf://snapshot*.jpg" -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=10000:mbd=2:trell -mf fps=$(FRAMERATE):type=jpg -nosound -o out.avi	
-#	ffmpeg -i out.avi out.mp4
-	ffmpeg -r $(FRAMERATE) -f image2 -pattern_type glob -i '../output/snapshot*.svg' -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec -o ../output/out.mp4
-#	ffmpeg -r $(FRAMERATE) -f image2 -i snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec aac out.mp4
-	#del snap*.jpg
-# archival 
+clean_all:
+	rm -f *.o
+	rm -f $(PROGRAM_NAME)*
 	
+clean:
+	rm -f *.o
+	rm -f $(PROGRAM_NAME)*
+	
+data-cleanup:
+	rm -f *.mat
+	rm -f *.xml
+	rm -f *.svg
+	rm -f *.jpg
+	rm -f $(SPACE)/*.mat
+	rm -f $(SPACE)/*.xml
+	rm -f $(SPACE)/*.svg
+	rm -f $(SPACE)/*.jpg
+
+# archival 
+
 checkpoint: 
 	zip -r $$(date +%b_%d_%Y_%H%M).zip Makefile *.cpp *.h config/*.xml custom_modules/* 
 	
@@ -192,3 +211,61 @@ unzip:
 untar: 
 	cp ../archives/latest.tar .
 	tar -xzf latest.tar
+
+# easier animation 
+
+FRAMERATE := 20
+OUTPUT := $(SPACE)/movies
+
+jpeg: 
+#	cp $(SPACE)/*.svg $(OUTPUT)/movies
+	@magick identify -format "%h" $(OUTPUT)/initial.svg >> $(OUTPUT)/__H.txt 
+	@magick identify -format "%w" $(OUTPUT)/initial.svg >> $(OUTPUT)/__W.txt 
+	@expr 2 \* \( $$(grep . $(OUTPUT)/__H.txt) / 2 \) >> $(OUTPUT)/__H1.txt 
+	@expr 2 \* \( $$(grep . $(OUTPUT)/__W.txt) / 2 \) >> $(OUTPUT)/__W1.txt 
+	@echo "$$(grep . $(OUTPUT)/__W1.txt)!x$$(grep . $(OUTPUT)/__H1.txt)!" >> $(OUTPUT)/__resize.txt 
+	@magick mogrify -format jpg -resize $$(grep . $(OUTPUT)/__resize.txt) $(OUTPUT)/s*.svg
+	rm -f $(OUTPUT)/__H*.txt $(OUTPUT)/__W*.txt $(OUTPUT)/__resize.txt 
+	
+gif: 
+	magick convert $(OUTPUT)/s*.svg $(OUTPUT)/out.gif 
+	 
+movie_jpeg: jpeg
+	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/$(MOVIE_NAME).mp4
+
+movie:
+	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/$(MOVIE_NAME).mp4	
+#movie:
+#	cd $(SPACE); \
+#	magick mogrify -format jpg snapshot*.svg; \
+#	mencoder "mf://snapshot*.jpg" -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=10000:mbd=2:trell -mf fps=18:type=jpg -nosound -o $(MOVIE_NAME).avi; \
+#	mv $(MOVIE_NAME).avi ../movies/$(MOVIE_NAME).avi	
+	
+# upgrade rules 
+
+SOURCE := PhysiCell_upgrade.zip 
+get-upgrade: 
+	@echo $$(curl https://raw.githubusercontent.com/MathCancer/PhysiCell/master/VERSION.txt) >> VER.txt 
+	@echo https://github.com/MathCancer/PhysiCell/releases/download/$$(grep . VER.txt)/PhysiCell_V.$$(grep . VER.txt).zip >> DL_FILE.txt 
+	rm -f VER.txt
+	$$(curl -L $$(grep . DL_FILE.txt) --output PhysiCell_upgrade.zip)
+	rm -f DL_FILE.txt 
+
+PhysiCell_upgrade.zip: 
+	make get-upgrade 
+
+upgrade: $(SOURCE)
+	unzip $(SOURCE) PhysiCell/VERSION.txt
+	mv -f PhysiCell/VERSION.txt . 
+	unzip $(SOURCE) PhysiCell/core/* 
+	cp -r PhysiCell/core/* core 
+	unzip $(SOURCE) PhysiCell/modules/* 
+	cp -r PhysiCell/modules/* modules 
+	unzip $(SOURCE) PhysiCell/sample_projects/* 
+	cp -r PhysiCell/sample_projects/* sample_projects 
+	unzip $(SOURCE) PhysiCell/BioFVM/* 
+	cp -r PhysiCell/BioFVM/* BioFVM
+	unzip $(SOURCE) PhysiCell/documentation/User_Guide.pdf
+	mv -f PhysiCell/documentation/User_Guide.pdf documentation
+	rm -f -r PhysiCell
+	rm -f $(SOURCE) 
