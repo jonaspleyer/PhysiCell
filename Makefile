@@ -5,6 +5,7 @@ MOVIE_NAME = $(mn)
 SPACE := ../../space
 
 CC := g++
+MAKEFLAGS += -j$(($(nproc)-2))
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 
@@ -330,7 +331,7 @@ clean_all:
 	rm -f $(PROGRAM_NAME)*
 	
 clean:
-	rm -f custom.o domain.o control.o light.o optogenetics.o
+	rm -f *.o
 	rm -f $(PROGRAM_NAME)*
 	
 data-cleanup:
