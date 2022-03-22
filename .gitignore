@@ -1,4 +1,5 @@
-
+output/*
+project
 *.o
 unit-test-conservation.exe
 Makefile-backup
