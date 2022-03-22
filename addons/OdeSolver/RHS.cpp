@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -65,140 +65,66 @@
 ###############################################################################
 */
 
-#include "./custom.h"
-#include "./optogenetics/OptoGen.h"
+#include "RHS.h"
 
-void create_cell_types( void )
+#include <math.h>
+#include <iostream>
+#include "../../modules/PhysiCell_standard_modules.h"
+#include "../../core/PhysiCell.h"
+
+void RHS::set_parameter(int id, double value)
 {
-	// set the random seed 
-	SeedRandom( parameters.ints("random_seed") );  
-	
-	/* 
-	   Put any modifications to default cell definition here if you 
-	   want to have "inherited" by other cell types. 
-	   
-	   This is a good place to set default functions. 
-	*/ 
-	
-	initialize_default_cell_definition(); 
-	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
-	
-	cell_defaults.functions.volume_update_function = standard_volume_update_function;
-	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
-
-	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
-	cell_defaults.functions.custom_cell_rule = NULL; 
-	cell_defaults.functions.contact_function = NULL; 
-	
-	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL; 
-	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
-	
-	/*
-	   This parses the cell definitions in the XML config file. 
-	*/
-	
-	initialize_cell_definitions_from_pugixml(); 
-	
-	/* 
-	   Put any modifications to individual cell definitions here. 
-	   
-	   This is a good place to set custom functions. 
-	*/ 
-	
-	cell_defaults.functions.update_phenotype = phenotype_function; 
-	cell_defaults.functions.custom_cell_rule = custom_function; 
-	cell_defaults.functions.contact_function = contact_function; 
-	
-	/*
-	   This builds the map of cell definitions and summarizes the setup. 
-	*/
-		
-	build_cell_definitions_maps(); 
-	display_cell_definitions( std::cout ); 
-	
-	return; 
-}
-
-void setup_microenvironment( void )
-{
-	// set domain parameters 
-	
-	// put any custom code to set non-homogeneous initial conditions or 
-	// extra Dirichlet nodes here. 
-	
-	// initialize BioFVM 
-	
-	initialize_microenvironment(); 	
-	
-	return; 
-}
-
-
-void run_optogenetics ( const double &t ) {
-
-}
-
-void setup_optogenetics( void ) {
-	Opto::Controller::display_intersection();
-}
-
-
-void setup_tissue( void )
-{
-	double Xmin = microenvironment.mesh.bounding_box[0]; 
-	double Ymin = microenvironment.mesh.bounding_box[1]; 
-	double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	double Xmax = microenvironment.mesh.bounding_box[3]; 
-	double Ymax = microenvironment.mesh.bounding_box[4]; 
-	double Zmax = microenvironment.mesh.bounding_box[5]; 
-	
-	if( default_microenvironment_options.simulate_2D == true )
+	if ( !initialized )
 	{
-		Zmin = 0.0; 
-		Zmax = 0.0; 
+		initialized = true;
 	}
-	
-	double Xrange = Xmax - Xmin; 
-	double Yrange = Ymax - Ymin; 
-	double Zrange = Zmax - Zmin; 
-	
-	// create some of each type of cell 
-	
-	Cell* pC;
-	
-	for( int k=0; k < cell_definitions_by_index.size() ; k++ )
+	// Create new parameter if it does not exist
+	if ( id >= id_to_val.size() )
 	{
-		Cell_Definition* pCD = cell_definitions_by_index[k]; 
-		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
-		for( int n = 0 ; n < parameters.ints("number_of_cells") ; n++ )
-		{
-			std::vector<double> position = {0,0,0}; 
-			position[0] = Xmin + UniformRandom()*Xrange; 
-			position[1] = Ymin + UniformRandom()*Yrange; 
-			position[2] = Zmin + UniformRandom()*Zrange; 
-			
-			pC = create_cell( *pCD ); 
-			pC->assign_position( position );
-		}
+		id_to_val.resize(id+1);
+		id_to_val[id] = value;
 	}
-	std::cout << std::endl; 
-	
-	// load cells from your CSV file (if enabled)
-	load_cells_from_pugixml(); 	
-	
-	return; 
+	// Otherwise change it
+	else
+	{
+		id_to_val[id] = value;
+	}
+	return;
 }
 
-std::vector<std::string> my_coloring_function( Cell* pCell )
-{ return paint_by_number_cell_coloring(pCell); }
+void RHS::set_parameter(std::string name, double value)
+{
+	if ( !initialized )
+	{
+		initialized = true;
+	}
+	name_to_val[name] = value;
+	return;
+}
 
-void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
-{ return; }
+double RHS::P(std::string name)
+{
+	return name_to_val[name];
+}
 
-void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
-{ return; } 
+double RHS::P(int id)
+{
+	return id_to_val[id];
+}
 
-void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
-{ return; } 
+//void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
+void RHS::operator() ( const state_type& X , state_type& dX , const double t )
+{
+	// EXAMPLE FOR 2 EXTERNAL AND 2 INTERNAL SUBSTRATES
+	// This changes the external values
+	// dX[0] = P(1)*P(20) - P(2)*X[0] + P(3)*pow(X[0],2)*X[1];
+	// dX[1] = P(4)*P(20) - P(3)*pow(X[0],2)*X[1];
+
+	// This changes internal and pure internal values
+	// dX[2] = -10*(X[2]-X[0]);
+	// dX[3] = -10*(X[3]-X[1]);
+
+	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
+	std::fill(dX.begin(), dX.end(), 0);
+	return;
+}

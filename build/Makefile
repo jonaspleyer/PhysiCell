@@ -32,7 +32,7 @@ ARCH := native # best auto-tuning
 # ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++17 -D ADDON_ODE_SOLVER -lCGAL -lgmp -lmpfr
 
 ifeq ($(OS),Windows_NT)
 else
@@ -63,8 +63,12 @@ PhysiCell_custom_module_OBJECTS := custom.o
 
 pugixml_OBJECTS := pugixml.o
 
+ODE_SOLVER_OBJECTS := ode_solver_intracellular.o RHS.o
+
+OPTOGENETICS_OBJECTS := OptoGen_controller.o OptoGen_light.o
+
 PhysiCell_OBJECTS := $(BioFVM_OBJECTS)  $(pugixml_OBJECTS) $(PhysiCell_core_OBJECTS) $(PhysiCell_module_OBJECTS)
-ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
+ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(ODE_SOLVER_OBJECTS) $(OPTOGENETICS_OBJECTS)
 
 # compile the project 
 
@@ -157,8 +161,22 @@ PhysiCell_geometry.o: ../modules/PhysiCell_geometry.cpp
 	
 # user-defined PhysiCell modules
 
-custom.o: ../custom_modules/custom.cpp 
+ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h RHS.o
+	$(COMPILE_COMMAND) -c ../addons/OdeSolver/ode_solver_intracellular.cpp
+
+RHS.o: ../addons/OdeSolver/RHS.cpp ../addons/OdeSolver/RHS.h
+	$(COMPILE_COMMAND) -c ../addons/OdeSolver/RHS.cpp
+
+custom.o: ../custom_modules/custom.cpp ../custom_modules/custom.h OptoGen_controller.o
 	$(COMPILE_COMMAND) -c ../custom_modules/custom.cpp
+
+# OPTOGENETICS
+OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h OptoGen_light.o
+	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_controller.cpp
+
+OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp ../custom_modules/optogenetics/OptoGen_light.h
+	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_light.cpp
+
 
 # cleanup
 

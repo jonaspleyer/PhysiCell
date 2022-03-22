@@ -79,6 +79,7 @@
 // put custom code modules here! 
 
 #include "./custom_modules/custom.h" 
+
 	
 using namespace BioFVM;
 using namespace PhysiCell;
@@ -126,6 +127,8 @@ int main( int argc, char* argv[] )
 	create_cell_types();
 	
 	setup_tissue();
+
+	setup_optogenetics();
 
 	/* Users typically stop modifying here. END USERMODS */ 
 	
@@ -221,6 +224,7 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
+			run_optogenetics(PhysiCell_globals.current_time);
 			
 			PhysiCell_globals.current_time += diffusion_dt;
 		}
