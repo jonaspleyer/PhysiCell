@@ -161,10 +161,10 @@ PhysiCell_geometry.o: ../modules/PhysiCell_geometry.cpp
 	
 # user-defined PhysiCell modules
 
-ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp ../addons/OdeSolver/ode_solver_intracellular.h RHS.o
+ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp RHS.o
 	$(COMPILE_COMMAND) -c ../addons/OdeSolver/ode_solver_intracellular.cpp
 
-RHS.o: ../addons/OdeSolver/RHS.cpp ../addons/OdeSolver/RHS.h
+RHS.o: ../addons/OdeSolver/RHS.cpp
 	$(COMPILE_COMMAND) -c ../addons/OdeSolver/RHS.cpp
 
 custom.o: ../custom_modules/custom.cpp ../custom_modules/custom.h OptoGen_controller.o
