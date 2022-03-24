@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">7200</max_time> <!-- 5 days * 24 h * 60 min -->
+		<max_time units="min">1500</max_time> <!-- 5 days * 24 h * 60 min -->
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
@@ -97,7 +97,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>6</omp_num_threads>
+		<omp_num_threads>12</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -126,7 +126,7 @@
 	<microenvironment_setup>
 		<variable name="substrate" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">1000.0</diffusion_coefficient>
 				<decay_rate units="1/min">10</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -301,12 +301,15 @@
 	</initial_conditions>	
 	
 	<user_parameters>
+		<optogenetics_update_dt type="double" units="min">20</optogenetics_update_dt>
+		<optogenetics_dt type="double" units="min">4</optogenetics_dt>
+		
 		<random_seed type="int" units="dimensionless">0</random_seed> 
 		<!-- example parameters from the template --> 
 		
 		<div_initialization type="divider" description="---Initialization settings---"/>
 		
-		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">5</number_of_cells>
+		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1500</number_of_cells>
 	</user_parameters>
 	
 </PhysiCell_settings>

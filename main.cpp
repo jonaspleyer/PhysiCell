@@ -79,6 +79,7 @@
 // put custom code modules here! 
 
 #include "./custom_modules/custom.h" 
+#include "./custom_modules/opto_setup.h"
 
 	
 using namespace BioFVM;
