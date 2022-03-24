@@ -59,7 +59,7 @@ PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
 
 # put your custom objects here (they should be in the custom_modules directory)
 
-PhysiCell_custom_module_OBJECTS := custom.o
+PhysiCell_custom_module_OBJECTS := custom.o opto_setup.o
 
 pugixml_OBJECTS := pugixml.o
 
@@ -167,15 +167,21 @@ ode_solver_intracellular.o: ../addons/OdeSolver/ode_solver_intracellular.cpp RHS
 RHS.o: ../addons/OdeSolver/RHS.cpp
 	$(COMPILE_COMMAND) -c ../addons/OdeSolver/RHS.cpp
 
-custom.o: ../custom_modules/custom.cpp ../custom_modules/custom.h OptoGen_controller.o
+custom.o: ../custom_modules/custom.cpp
 	$(COMPILE_COMMAND) -c ../custom_modules/custom.cpp
 
+opto_setup.o: ../custom_modules/opto_setup.cpp OptoGen_controller.o OptoGen_utilities.o
+	$(COMPILE_COMMAND) -c ../custom_modules/opto_setup.cpp
+
 # OPTOGENETICS
-OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h OptoGen_light.o
+OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h OptoGen_light.o OptoGen_utilities.o
 	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_controller.cpp
 
-OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp ../custom_modules/optogenetics/OptoGen_light.h
+OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp
 	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_light.cpp
+
+OptoGen_utilities.o: ../custom_modules/optogenetics/OptoGen_utilities.cpp
+	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_utilities.cpp
 
 
 # cleanup

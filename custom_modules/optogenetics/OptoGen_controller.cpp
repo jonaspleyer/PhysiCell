@@ -5,14 +5,30 @@
 namespace Opto::Controller {
 
 
-template<class Domain, typename Value>
-bool Controller<Domain, Value>::is_point_in_domain(Kernel::Point_3& point) {
-    return domain.has_on_bounded_side(point);
+// TODO implement this correctly
+void Supervisor::add_controller(const std::string& name, BaseController& controller) {
+    // cells_by_controller[controller] = std::vector<PhysiCell::Cell*>{};
+    // controllers.push_back(controller);
+    std::cout << "Added a controller with the name " << name << std::endl;
+    return;
 }
 
-template<class Domain, typename Value>
-double Controller<Domain, Value>::get_volume() {
-    return 0.0;
+
+// TODO implement this
+void Supervisor::remove_controller(const std::string& name) {
+
+}
+
+
+// TODO implement this
+void Supervisor::run_all_controllers() {
+
+}
+
+
+// TODO implement this
+void Supervisor::distribute_cells_to_controllers(std::vector<PhysiCell::Cell*> cells) {
+
 }
 
 }

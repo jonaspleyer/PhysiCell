@@ -3,5 +3,6 @@
 
 #include "OptoGen_controller.h"
 #include "OptoGen_light.h"
+#include "OptoGen_utilities.h"
 
 #endif
