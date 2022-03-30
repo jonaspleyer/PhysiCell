@@ -6,20 +6,23 @@
 
 #include "../../core/PhysiCell_cell.h"
 
+// Include CGal libraries for 2D and 3D geometry
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+
 #include <vector>
 #include <algorithm>
 
 namespace Opto::Utils {
 
 
-// TODO this needs! to be fixed
+// TODO this probably needs to be extended depending on which CGAL modules will be used in the future
 template<class Domain>
 bool point_is_in_domain(Domain& domain, std::vector<double> point) {
-    return true;
+    return domain.has_on_bounded_side(Kernel::Point_3(point[0], point[1], point[2]));
 }
 
 
-// TODO check this implementation
 template<class Domain>
 std::vector<PhysiCell::Cell*> get_cells_in_domain(Domain& domain) {
     std::vector<PhysiCell::Cell*> cells{};
