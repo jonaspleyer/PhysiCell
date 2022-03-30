@@ -32,7 +32,7 @@ template<typename Value>
 class Metric {
     public:
         std::deque<double> state{};
-        virtual double calculate(Value& v1, Value& v2) = 0;
+        virtual double calculate(Value& target, Value& observed) = 0;
 };
 
 
