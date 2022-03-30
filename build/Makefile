@@ -32,7 +32,7 @@ ARCH := native # best auto-tuning
 # ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++17 -D ADDON_ODE_SOLVER -lCGAL -lgmp -lmpfr
+CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++20 -D ADDON_ODE_SOLVER -lCGAL -lgmp -lmpfr
 
 ifeq ($(OS),Windows_NT)
 else
@@ -177,11 +177,8 @@ opto_setup.o: ../custom_modules/opto_setup.cpp OptoGen_controller.o OptoGen_util
 OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h OptoGen_light.o OptoGen_utilities.o
 	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_controller.cpp
 
-OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp
+OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp ../custom_modules/optogenetics/OptoGen_utilities.h
 	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_light.cpp
-
-OptoGen_utilities.o: ../custom_modules/optogenetics/OptoGen_utilities.cpp
-	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_utilities.cpp
 
 
 # cleanup
