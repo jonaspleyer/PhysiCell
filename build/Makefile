@@ -170,11 +170,11 @@ RHS.o: ../addons/OdeSolver/RHS.cpp
 custom.o: ../custom_modules/custom.cpp
 	$(COMPILE_COMMAND) -c ../custom_modules/custom.cpp
 
-opto_setup.o: ../custom_modules/opto_setup.cpp OptoGen_controller.o OptoGen_utilities.o
+opto_setup.o: ../custom_modules/opto_setup.cpp OptoGen_controller.o
 	$(COMPILE_COMMAND) -c ../custom_modules/opto_setup.cpp
 
 # OPTOGENETICS
-OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h OptoGen_light.o OptoGen_utilities.o
+OptoGen_controller.o: ../custom_modules/optogenetics/OptoGen_controller.cpp ../custom_modules/optogenetics/OptoGen_controller.h ../custom_modules/optogenetics/OptoGen_utilities.h OptoGen_light.o
 	$(COMPILE_COMMAND) -c ../custom_modules/optogenetics/OptoGen_controller.cpp
 
 OptoGen_light.o: ../custom_modules/optogenetics/OptoGen_light.cpp ../custom_modules/optogenetics/OptoGen_utilities.h
