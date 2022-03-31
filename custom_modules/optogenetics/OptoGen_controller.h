@@ -19,22 +19,22 @@ namespace Opto::Controller {
 
 
 // Interface for defining observable quantities
-template<class ObservableDomain, typename Value>
+template<typename ObservableType, class ObservableDomain>
 class Observable {
     public:
         ObservableDomain observable_domain;
         std::vector<PhysiCell::Cell*> cells_in_observable_domain{};
-        std::deque<Value> state{};
-        virtual Value measure(ObservableDomain& _domain, std::vector<PhysiCell::Cell*> cells) = 0;
+        std::deque<ObservableType> state{};
+        virtual ObservableType measure(ObservableDomain& _domain, std::vector<PhysiCell::Cell*> cells) = 0;
 };
 
 
 // Used to meaningfully compare a observed to a target value
-template<typename Value>
+template<typename ObservableType>
 class Metric {
     public:
         std::deque<double> state{};
-        virtual double calculate(Value& target, Value& observed) = 0;
+        virtual double calculate(ObservableType& target, ObservableType& observed) = 0;
 };
 
 
@@ -58,18 +58,18 @@ class Effect {
 
 
 // Only specify that class exists to already reference in some functions
-template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
+template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
 class Controller;
 
 
 // *********************************************************************************
 // Template functions for actually running and updating controllers.
 // These functions will be used in the visitor pattern outlined below
-template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
-void run_single_controller(Controller<ObservableDomain, EffectDomain, Value, DerivedT>& controller) {
+template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
+void run_single_controller(Controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>& controller) {
     // Perform static cast to have access to derived class values
     auto controller_derived = static_cast<DerivedT*>(&controller);
-    update_controller<ObservableDomain, EffectDomain, Value, DerivedT>(*controller_derived);
+    update_controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>(*controller_derived);
     // Apply effect for every cell in domain of effect
     std::for_each(
         controller_derived->effect->cells_in_effect_domain.begin(),
@@ -84,8 +84,8 @@ void run_single_controller(Controller<ObservableDomain, EffectDomain, Value, Der
 }
 
 
-template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
-void update_controller(Controller<ObservableDomain, EffectDomain, Value, DerivedT>& controller) {
+template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
+void update_controller(Controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>& controller) {
     auto controller_derived = static_cast<DerivedT*>(&controller);
     controller_derived->observable->cells_in_observable_domain = Opto::Utils::get_cells_in_domain(controller_derived->observable->observable_domain);
     controller_derived->effect->cells_in_effect_domain = Opto::Utils::get_cells_in_domain(controller_derived->effect->effect_domain);
@@ -98,8 +98,8 @@ void update_controller(Controller<ObservableDomain, EffectDomain, Value, Derived
 // and updating (see steps 1)
 class Visitor_Run {
 public:
-    template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
-    void visit(Controller<ObservableDomain, EffectDomain, Value, DerivedT>& ci) {
+    template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
+    void visit(Controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>& ci) {
         run_single_controller(ci);
     }
 };
@@ -107,8 +107,8 @@ public:
 
 class Visitor_Update {
 public:
-    template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
-    void visit(Controller<ObservableDomain, EffectDomain, Value, DerivedT>& ci) {
+    template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
+    void visit(Controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>& ci) {
         update_controller(ci);
     }
 };
@@ -128,17 +128,17 @@ public:
 // 3. Quantify control response         ==> controllfunctor
 // 4. Apply optogenetic effect          ==> effect->effect_domain, effect
 //    on cells
-template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
+template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain>
 class Controller : public ControllerElement {
 private:
     int state_max_size = 500;
 public:
-    std::unique_ptr<Observable<ObservableDomain, Value>> observable{};
-    Value target{};
-    std::unique_ptr<Metric<Value>> metric{};
+    std::unique_ptr<Observable<ObservableDomain, ObservableType>> observable{};
+    ObservableType target{};
+    std::unique_ptr<Metric<ObservableType>> metric{};
     std::unique_ptr<ControllFunctor> controllfunctor{};
     std::unique_ptr<Effect<EffectDomain>> effect{};
-    
+
     void accept(Visitor_Run& v) override {
         v.visit(*this);
     };
@@ -202,8 +202,8 @@ class Supervisor {
         void run_all_controllers();
         
         // Add/Remove Controllers/Visitors
-        template<class ObservableDomain, class EffectDomain, typename Value, class DerivedT>
-        void add_controller(std::string const& name, Controller<ObservableDomain, EffectDomain, Value, DerivedT>* controller)
+        template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain=ObservableDomain>
+        void add_controller(std::string const& name, Controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>* controller)
         {
             if (!controllers_by_name.contains(name)) {
                 controllers_by_name[name] = std::unique_ptr<ControllerElement>(controller);
