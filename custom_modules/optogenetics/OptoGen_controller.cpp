@@ -37,12 +37,12 @@ void Supervisor::update_controller_with_visitor(std::string const& controller_na
 
 
 void Supervisor::update_controller_with_all_visitors(std::string const& controller_name) {
-    if (controller_name_is_present(controller_name)) {
-        for (auto const& [visitor_update_name, visitor_update] : visitors_update_by_name) {
-            controllers_by_name[controller_name]->accept(*visitor_update);
-        }
+    if (!controller_name_is_present(controller_name)) {
+        throw std::runtime_error("[Opto] ERROR: Controller with name " + controller_name + " does not exist.");
     }
-    throw std::runtime_error("[Opto] ERROR: Controller with name " + controller_name + " does not exist.");
+    for (auto const& [visitor_update_name, visitor_update] : visitors_update_by_name) {
+        controllers_by_name[controller_name]->accept(*visitor_update);
+    }
 }
 
 
