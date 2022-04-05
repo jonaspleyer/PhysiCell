@@ -184,7 +184,54 @@ void setup_tissue( void )
 }
 
 std::vector<std::string> my_coloring_function( Cell* pCell )
-{ return paint_by_number_cell_coloring(pCell); }
+{
+	static std::vector< std::string > colors(0); 
+	
+	// start all black 
+	
+	std::vector<std::string> output = { "black", "black", "black", "black" }; 
+	
+	// paint by number -- by cell type 
+	std::string interior_color = "grey"; 
+	std::string interior_color_diff_1 = "red";
+	std::string interior_color_diff_2 = "blue";
+	std::string interior_color_diff_3 = "yellow";
+	
+	output[0] = interior_color; // set cytoplasm color 
+	
+	if( pCell->phenotype.death.dead == false ) // if live, color nucleus same color 
+	{
+		output[2] = interior_color; 
+		output[3] = interior_color; 
+	}
+	// apoptotic cells will retain a black nucleus 
+	// if necrotic, color the nucleus brown 
+	else if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic_swelling || 
+			pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic_lysed || 
+			pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::necrotic )
+	{
+		output[2] = "rgb(139,69,19)";
+		output[3] = "rgb(139,69,19)";
+	}
+	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
+	{
+		output[0] = interior_color_diff_1;
+		output[2] = interior_color_diff_1;
+	}
+	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_2")) < 0.1)
+	{
+		output[0] = interior_color_diff_2;
+		output[2] = interior_color_diff_2;
+	}
+	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
+	{
+		output[0] = interior_color_diff_3;
+		output[2] = interior_color_diff_3;
+	}
+
+	return output;
+
+}
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 { return; }
