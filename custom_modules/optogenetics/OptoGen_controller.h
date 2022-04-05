@@ -185,8 +185,8 @@ class Supervisor {
         bool visitor_update_name_is_present(std::string const& visitor_update_name);
     public:
         Supervisor() {
-            visitors_run_by_name["Default"] = std::make_unique<Visitor_Run>();
-            visitors_update_by_name["Default"] = std::make_unique<Visitor_Update>();
+            add_visitor_run("Default", new Visitor_Run);
+            add_visitor_update("Default", new Visitor_Update);
         }
 
         // Update controllers
