@@ -596,6 +596,12 @@ class Intracellular
     virtual int validate_PhysiCell_tokens(PhysiCell::Phenotype& phenotype) = 0;
     virtual int validate_SBML_species() = 0;
     virtual int create_custom_data_for_SBML(PhysiCell::Phenotype& phenotype) = 0;
+
+	
+	// ================  specific to "odeSolver" ================
+	// This functions defines the update Function for the RHS of the ODE
+    virtual void update_Cell_parameters(Cell &cell, double t, double diffusion_dt) = 0;
+    virtual void set_parameter_value(int id, double value) = 0;
 };
 
 class Phenotype

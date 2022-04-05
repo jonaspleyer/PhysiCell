@@ -74,9 +74,8 @@ using namespace PhysiCell;
 // setup functions to help us along 
 
 void create_cell_types( void );
-/* void run_optogenetics ( const double &t );
-void setup_optogenetics( void );*/
 void setup_tissue( void ); 
+void define_cell_parameters( void );
 
 // set up the BioFVM microenvironment 
 void setup_microenvironment( void ); 

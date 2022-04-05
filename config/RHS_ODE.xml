@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 /*
 ###############################################################################
 # If you use PhysiCell in your project, please cite PhysiCell and the version #
@@ -64,67 +66,22 @@
 #                                                                             #
 ###############################################################################
 */
+-->
+<title>MathML's</title>
 
-#include "RHS.h"
-
-#include <math.h>
-#include <iostream>
-#include "../../modules/PhysiCell_standard_modules.h"
-#include "../../core/PhysiCell.h"
-
-void RHS::set_parameter(int id, double value)
-{
-	if ( !initialized )
-	{
-		initialized = true;
-	}
-	// Create new parameter if it does not exist
-	if ( id >= id_to_val.size() )
-	{
-		id_to_val.resize(id+1);
-		id_to_val[id] = value;
-	}
-	// Otherwise change it
-	else
-	{
-		id_to_val[id] = value;
-	}
-	return;
-}
-
-void RHS::set_parameter(std::string name, double value)
-{
-	if ( !initialized )
-	{
-		initialized = true;
-	}
-	name_to_val[name] = value;
-	return;
-}
-
-double RHS::P(std::string name)
-{
-	return name_to_val[name];
-}
-
-double RHS::P(int id)
-{
-	return id_to_val[id];
-}
-
-//void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
-void RHS::operator() ( const state_type& X , state_type& dX , const double t )
-{
-	// EXAMPLE FOR 2 EXTERNAL AND 2 INTERNAL SUBSTRATES
-	// This changes the external values
-	dX[0] = P(00);
-	dX[1] = P(10);
-
-	// This changes internal and pure internal values
-	// dX[2] = -10*(X[2]-X[0]);
-	// dX[3] = -10*(X[3]-X[1]);
-
-	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
-	std::fill(dX.begin(), dX.end(), 0);
-	return;
-}
+<ODE-Definition>
+	<math xmlns="http://www.w3.org/1998/Math/MathML">
+		<mrow>
+			<msup>
+				<mfenced>
+				<mrow>
+					<mi>a</mi>
+					<mo>+</mo>
+					<mi>b</mi>
+				</mrow>
+				</mfenced>
+				<mn>2</mn>
+			</msup>
+		</mrow>
+	</math>
+</ODE-Definition>

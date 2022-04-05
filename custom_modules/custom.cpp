@@ -105,7 +105,8 @@ void create_cell_types( void )
 	   Put any modifications to individual cell definitions here. 
 	   
 	   This is a good place to set custom functions. 
-	*/ 
+	*/
+
 	
 	cell_defaults.functions.update_phenotype = phenotype_function; 
 	cell_defaults.functions.custom_cell_rule = custom_function; 
@@ -114,11 +115,24 @@ void create_cell_types( void )
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
 	*/
+
+	// Set the update RHS rule for the default cell definition
+	// This NEEDS to be done after Intracellular was initialized by the xml file!
+
+	define_cell_parameters();
 		
 	build_cell_definitions_maps(); 
 	display_cell_definitions( std::cout ); 
 	
 	return; 
+}
+
+void define_cell_parameters( void )
+{
+	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production"));
+
+	return;
 }
 
 void setup_microenvironment( void )
@@ -233,11 +247,18 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 
 }
 
+
+// We want the cell to differentiate with a certain probability when enough substrate is around
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
-{ return; }
+{
+
+	return;
+}
+
 
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
-{ return; } 
+{ return; }
+
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
 { return; } 

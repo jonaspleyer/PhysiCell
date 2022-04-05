@@ -125,13 +125,21 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 	// secretions and uptakes. Syncing with BioFVM is automated. 
 
 	// std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " " << "secretion" << std::endl; 
-	#pragma omp parallel for 
+	#pragma omp parallel for firstprivate(t, phenotype_dt_, mechanics_dt_, diffusion_dt_)
 	for( int i=0; i < (*all_cells).size(); i++ )
 	{
+		#ifdef ADDON_ODE_SOLVER
+		if( (*all_cells)[i]->is_out_of_domain == false and (*all_cells)[i]->phenotype.intracellular->need_update() == true )
+		{
+			
+			(*all_cells)[i]->phenotype.intracellular->update_Cell_parameters(*(*all_cells)[i], t, diffusion_dt);
+		}
+		#else
 		if( (*all_cells)[i]->is_out_of_domain == false )
 		{
 			(*all_cells)[i]->phenotype.secretion.advance( (*all_cells)[i], (*all_cells)[i]->phenotype , diffusion_dt_ );
 		}
+		#endif
 	}
 	
 	//if it is the time for running cell cycle, do it!
