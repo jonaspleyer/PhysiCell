@@ -128,12 +128,6 @@ void Supervisor::run_all_controllers() {
             (*controller).second->accept(*(*visitor_run).second);
         }
     }
-
-    /* for (auto const& [controller_name, controller] : controllers_by_name) {
-        for (auto const& [visitor_run_name, visitor_run] : visitors_run_by_name) {
-            controller->accept(*visitor_run);
-        }
-    }*/
 }
 
 
