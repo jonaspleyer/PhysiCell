@@ -131,6 +131,7 @@ void define_cell_parameters( void )
 {
 	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_production"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("killer_production"));
 
 	return;
 }

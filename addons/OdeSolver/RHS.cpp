@@ -119,6 +119,7 @@ void RHS::operator() ( const state_type& X , state_type& dX , const double t )
 	// This changes the external values
 	dX[0] = P(00);
 	dX[1] = P(10);
+	dX[2] = P(20);
 
 	// This changes internal and pure internal values
 	// dX[2] = -10*(X[2]-X[0]);

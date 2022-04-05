@@ -69,34 +69,34 @@
 
 bool Write_SVG_start( std::ostream& os, double width, double height )
 {
- os << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" << std::endl 
-    << "<!-- Created with PhysiCell (http://PhysiCell.MathCancer.org/) -->" << std::endl; 
+ os << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" << "\n" 
+    << "<!-- Created with PhysiCell (http://PhysiCell.MathCancer.org/) -->" << "\n"; 
 
- os << "<svg " << std::endl
-    << " xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " << std::endl
-    << " xmlns:cc=\"http://creativecommons.org/ns#\" " << std::endl
-    << " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" " << std::endl
-    << " xmlns:svg=\"http://www.w3.org/2000/svg\" " << std::endl
-    << " xmlns=\"http://www.w3.org/2000/svg\" " << std::endl
-    << " version=\"1.1\" " << std::endl
-    << " width=\"" << width << "\" " << std::endl
-    << " height=\"" << height << "\" " << std::endl
-    << " id=\"svg2\">" << std::endl;
+ os << "<svg " << "\n"
+    << " xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " << "\n"
+    << " xmlns:cc=\"http://creativecommons.org/ns#\" " << "\n"
+    << " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" " << "\n"
+    << " xmlns:svg=\"http://www.w3.org/2000/svg\" " << "\n"
+    << " xmlns=\"http://www.w3.org/2000/svg\" " << "\n"
+    << " version=\"1.1\" " << "\n"
+    << " width=\"" << width << "\" " << "\n"
+    << " height=\"" << height << "\" " << "\n"
+    << " id=\"svg2\">" << "\n";
 	
 	return true; 
 }
 
 bool Write_SVG_end( std::ostream& os )
 {
- os << "</svg>" << std::endl;
+ os << "</svg>" << "\n";
  return true; 
 }
 
 bool Write_SVG_text( std::ostream& os, const char* str , double position_x, double position_y, double font_size , const char* color , const char* font)
 {
- os << "  <text x=\"" << position_x << "\" y=\""  << position_y << "\"" << std::endl
-    << "   font-family=\"" << font << "\" font-size=\"" << font_size << "\" fill=\"" << color << "\" >" << std::endl
-    << "   " << str << std::endl << "  </text>" << std::endl; 
+ os << "  <text x=\"" << position_x << "\" y=\""  << position_y << "\"" << "\n"
+    << "   font-family=\"" << font << "\" font-size=\"" << font_size << "\" fill=\"" << color << "\" >" << "\n"
+    << "   " << str << "\n" << "  </text>" << "\n"; 
   return true; 
 }
 
@@ -104,7 +104,7 @@ bool Write_SVG_circle( std::ostream& os, double center_x, double center_y, doubl
                        std::string stroke_color , std::string fill_color )
 {
  os << "  <circle cx=\"" << center_x << "\" cy=\"" << center_y << "\" r=\"" << radius << "\" stroke-width=\"" << stroke_size 
-    << "\" stroke=\"" << stroke_color << "\" fill=\"" << fill_color << "\"/>" << std::endl; 
+    << "\" stroke=\"" << stroke_color << "\" fill=\"" << fill_color << "\"/>" << "\n"; 
  return true; 
 }
 
@@ -114,7 +114,7 @@ bool Write_SVG_rect( std::ostream& os , double UL_corner_x, double UL_corner_y, 
 {
  os << "  <rect x=\"" << UL_corner_x << "\" y=\"" << UL_corner_y << "\" width=\"" << width << "\" height=\"" 
     << height << "\" stroke-width=\"" << stroke_size 
-    << "\" stroke=\"" << stroke_color << "\" fill=\"" << fill_color << "\"/>" << std::endl; 
+    << "\" stroke=\"" << stroke_color << "\" fill=\"" << fill_color << "\"/>" << "\n"; 
  return true; 
 }
 
@@ -122,6 +122,6 @@ bool Write_SVG_line( std::ostream& os , double start_x, double start_y, double e
                     std::string stroke_color )
 {
  os << "  <line x1=\"" << start_x << "\" y1=\"" << start_y << "\" x2=\"" << end_x << "\" y2=\"" << end_y << "\" "
-    << "stroke=\"" << stroke_color << "\" stroke-width=\"" << thickness << "\"/>" << std::endl; 
+    << "stroke=\"" << stroke_color << "\" stroke-width=\"" << thickness << "\"/>" << "\n"; 
  return true; 
 }

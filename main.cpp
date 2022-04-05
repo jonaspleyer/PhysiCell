@@ -72,6 +72,7 @@
 #include <cmath>
 #include <omp.h>
 #include <fstream>
+#include <thread>
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
@@ -207,8 +208,13 @@ int main( int argc, char* argv[] )
 			if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_SVG_save_time  ) < 0.01 * diffusion_dt )
 			{
 				if( PhysiCell_settings.enable_SVG_saves == true )
-				{	
-					sprintf( filename , "%s/snapshot%08u.svg" , PhysiCell_settings.folder.c_str() , PhysiCell_globals.SVG_output_index ); 
+				{
+					sprintf( filename , "%s/snapshot%08u.svg" , PhysiCell_settings.folder.c_str() , PhysiCell_globals.SVG_output_index );
+					// TODO this throws an error at the end of the simulation
+					// we also need to change "&microenvironment" -> "microenvironment" in the function definition 
+					// in PhysiCell_pathology.* in order to use threads. Or pass by reference (which is discouraged, since inaccurate)
+					// std::thread save_svg(SVG_plot, filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function);
+					// save_svg.detach();
 					SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
 					
 					PhysiCell_globals.SVG_output_index++; 
@@ -235,7 +241,7 @@ int main( int argc, char* argv[] )
 			log_output(PhysiCell_globals.current_time, PhysiCell_globals.full_output_index, microenvironment, report_file);
 			report_file.close();
 		}
-	}
+	}	
 	catch( const std::exception& e )
 	{ // reference to the base of a polymorphic object
 		std::cout << e.what(); // information from length_error printed
@@ -247,7 +253,7 @@ int main( int argc, char* argv[] )
 	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 	
 	sprintf( filename , "%s/final.svg" , PhysiCell_settings.folder.c_str() ); 
-	SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
+	SVG_plot(filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );
 	
 	// timer 
 	

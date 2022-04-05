@@ -379,12 +379,12 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 	std::ofstream os( filename , std::ios::out );
 	if( os.fail() )
 	{ 
-		std::cout << std::endl << "Error: Failed to open " << filename << " for SVG writing." << std::endl << std::endl; 
+		std::cout << "\n" << "Error: Failed to open " << filename << " for SVG writing." << "\n" << "\n"; 
 
-		std::cout << std::endl << "Error: We're not writing data like we expect. " << std::endl
-		<< "Check to make sure your save directory exists. " << std::endl << std::endl
-		<< "I'm going to exit with a crash code of -1 now until " << std::endl 
-		<< "you fix your directory. Sorry!" << std::endl << std::endl; 
+		std::cout << "\n" << "Error: We're not writing data like we expect. " << "\n"
+		<< "Check to make sure your save directory exists. " << "\n" << "\n"
+		<< "I'm going to exit with a crash code of -1 now until " << "\n" 
+		<< "you fix your directory. Sorry!" << "\n" << "\n"; 
 		exit(-1); 
 	} 
 	
@@ -417,15 +417,15 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 
 	// add an outer "g" for coordinate transforms 
 	
-	os << " <g id=\"tissue\" " << std::endl 
-	   << "    transform=\"translate(0," << plot_height+top_margin << ") scale(1,-1)\">" << std::endl; 
+	os << " <g id=\"tissue\" " << "\n" 
+	   << "    transform=\"translate(0," << plot_height+top_margin << ") scale(1,-1)\">" << "\n"; 
 	   
 	// prepare to do mesh-based plot (later)
 	
 	double dx_stroma = M.mesh.dx; 
 	double dy_stroma = M.mesh.dy; 
 	
-	os << "  <g id=\"ECM\">" << std::endl; 
+	os << "  <g id=\"ECM\">" << "\n"; 
   
 	int ratio = 1; 
 	double voxel_size = dx_stroma / (double) ratio ; 
@@ -472,7 +472,7 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
  
  }
 */
-	os << "  </g>" << std::endl; 
+	os << "  </g>" << "\n"; 
  
 	// Now draw vessels
 
@@ -489,7 +489,7 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 
  
 	// plot intersecting cells 
-	os << "  <g id=\"cells\">" << std::endl; 
+	os << "  <g id=\"cells\">" << "\n"; 
 	for( int i=0 ; i < total_cell_count ; i++ )
 	{
 		Cell* pC = (*all_cells)[i]; // global_cell_list[i]; 
@@ -503,7 +503,7 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
    
 			Colors = cell_coloring_function( pC ); 
 
-			os << "   <g id=\"cell" << pC->ID << "\">" << std::endl; 
+			os << "   <g id=\"cell" << pC->ID << "\">" << "\n"; 
   
 			// figure out how much of the cell intersects with z = 0 
    
@@ -519,11 +519,11 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 			 	Write_SVG_circle( os, (pC->position)[0]-X_lower, (pC->position)[1]-Y_lower, 
 					plot_radius, 0.5, Colors[3],Colors[2]); 
 			}					  
-			os << "   </g>" << std::endl;
+			os << "   </g>" << "\n";
 		}
 		
 	}
-	os << "  </g>" << std::endl; 
+	os << "  </g>" << "\n"; 
 	
 	// plot intersecting BM points
 	/* 
@@ -539,16 +539,16 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 		 double r = thickness/2.0; 
 		 double z = fabs( *(pBMN->Position)(2) - z_slice) ; 
 
-		 os << " <g id=\"BMN" << pBMN->ID << "\">" << std::endl; 
+		 os << " <g id=\"BMN" << pBMN->ID << "\">" << "\n"; 
 		 Write_SVG_circle( os,*(pBMN->Position)(0)-X_lower, *(pBMN->Position)(1)+top_margin-Y_lower, 10*thickness/2.0 , 0.5 , bm_color , bm_color ); 
-		 os << " </g>" << std::endl;
+		 os << " </g>" << "\n";
 		}
 		// pC = pC->pNextCell;
 	 }
 	*/ 
 	
 	// end of the <g ID="tissue">
-	os << " </g>" << std::endl; 
+	os << " </g>" << "\n"; 
  
 	// draw a scale bar
  
