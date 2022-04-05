@@ -40,8 +40,11 @@ void Supervisor::update_controller_with_all_visitors(std::string const& controll
     if (!controller_name_is_present(controller_name)) {
         throw std::runtime_error("[Opto] ERROR: Controller with name " + controller_name + " does not exist.");
     }
-    for (auto const& [visitor_update_name, visitor_update] : visitors_update_by_name) {
-        controllers_by_name[controller_name]->accept(*visitor_update);
+    #pragma omp parallel for firstprivate(controller_name)
+    for (int i=0; i<visitors_update_by_name.size(); i++) {
+        auto visitor_update = visitors_update_by_name.begin();
+        advance(visitor_update, i);
+        controllers_by_name[controller_name]->accept(*((*visitor_update).second));
     }
 }
 
@@ -50,16 +53,25 @@ void Supervisor::update_visit_all_controllers(std::string const& visitor_update_
     if (!visitor_update_name_is_present(visitor_update_name)) {
         throw std::runtime_error("[Opto] ERROR: Visitor_Update with name " + visitor_update_name + " does not exist.");
     }
-    for (auto const& [controller_name, controller] : controllers_by_name) {
-        controller->accept(*visitors_update_by_name[visitor_update_name]);
+    #pragma omp parallel for firstprivate(visitor_update_name)
+    for (int i=0; i<controllers_by_name.size(); i++) {
+        auto controller = controllers_by_name.begin();
+        advance(controller, i);
+        (*controller).second->accept(*visitors_update_by_name[visitor_update_name]);
     }
 }
 
 
 void Supervisor::update_all_controllers() {
-    for (auto const& [controller_name, controller] : controllers_by_name) {
-        for (auto const& [visitor_update_name, visitor_update] : visitors_update_by_name) {
-            controller->accept(*visitor_update);
+    #pragma omp parallel for
+    for (int i=0; i<controllers_by_name.size(); i++) {
+        for (int j=0; j<visitors_update_by_name.size(); j++) {
+            auto controller = controllers_by_name.begin();
+            advance(controller, i);
+            
+            auto visitor_update = visitors_update_by_name.begin();
+            advance(visitor_update, j);
+            (*controller).second->accept(*(*visitor_update).second);
         }
     }
 }
@@ -82,8 +94,11 @@ void Supervisor::run_controller_with_all_visitors(std::string const& controller_
     if (!controller_name_is_present(controller_name)) {
         throw std::runtime_error("[Opto] ERROR: Controller with name " + controller_name + " does not exist.");
     }
-    for (auto const& [visitor_run_name, visitor_run] : visitors_run_by_name) {
-        controllers_by_name[controller_name]->accept(*visitor_run);
+    #pragma omp parallel for firstprivate(controller_name)
+    for (int i=0; i<visitors_run_by_name.size(); i++) {
+        auto visitor_run = visitors_run_by_name.begin();
+        advance(visitor_run, i);
+        controllers_by_name[controller_name]->accept(*(*visitor_run).second);
     }
 }
 
@@ -92,18 +107,33 @@ void Supervisor::run_visit_all_controllers(std::string const& visitor_run_name) 
     if (!visitor_run_name_is_present(visitor_run_name)) {
         throw std::runtime_error("[Opto] ERROR: Visitor_Run with name " + visitor_run_name + " does not exist.");
     }
-    for (auto const& [controller_name, controller] : controllers_by_name) {
-        controller->accept(*visitors_run_by_name[visitor_run_name]);
+    #pragma omp parallel for firstprivate(visitor_run_name)
+    for (int i=0; i<controllers_by_name.size(); i++) {
+        auto controller = controllers_by_name.begin();
+        advance(controller, i);
+        (*controller).second->accept(*visitors_run_by_name[visitor_run_name]);
     }
 }
 
 
 void Supervisor::run_all_controllers() {
-    for (auto const& [controller_name, controller] : controllers_by_name) {
+    #pragma omp parallel for
+    for (int i=0; i<controllers_by_name.size(); i++) {
+        for (int j=0; j<visitors_run_by_name.size(); j++) {
+            auto controller = controllers_by_name.begin();
+            advance(controller, i);
+            
+            auto visitor_run = visitors_run_by_name.begin();
+            advance(visitor_run, j);
+            (*controller).second->accept(*(*visitor_run).second);
+        }
+    }
+
+    /* for (auto const& [controller_name, controller] : controllers_by_name) {
         for (auto const& [visitor_run_name, visitor_run] : visitors_run_by_name) {
             controller->accept(*visitor_run);
         }
-    }
+    }*/
 }
 
 
