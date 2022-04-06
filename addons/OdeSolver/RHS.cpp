@@ -109,7 +109,11 @@ double RHS::P(std::string name)
 
 double RHS::P(int id)
 {
-	return id_to_val[id];
+	if (id < id_to_val.size()) {
+		return id_to_val[id];
+	} else {
+		return 0.0;
+	}
 }
 
 //void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
