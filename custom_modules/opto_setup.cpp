@@ -131,11 +131,13 @@ double PID_Controllfunctor::adjust(std::deque<double> state) {
 void Diff_1_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Check if cells meets criteria
     bool cell_not_dead = !cell->phenotype.death.dead;
-    bool cell_correct_type = cell->type_name == "differentiation_cell";
+    bool cell_correct_type = cell->type_name == "default";
 
     if (cell_correct_type) {
-        cell->phenotype.intracellular->set_parameter_value(00, std::max(discrepancy*10000.0, 0.0));
-        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
+        double current_value = cell->phenotype.intracellular->get_parameter_value(",00");
+        double new_value = std::max(current_value + discrepancy, 0.0);
+        cell->phenotype.intracellular->set_parameter_value(00, new_value);
+        // cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
     }
     return;
 }
@@ -144,11 +146,13 @@ void Diff_1_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
 void Diff_2_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Check if cells meets criteria
     bool cell_not_dead = !cell->phenotype.death.dead;
-    bool cell_correct_type = cell->type_name == "differentiation_cell";
+    bool cell_correct_type = cell->type_name == "default";
 
     if (cell_correct_type) {
-        cell->phenotype.intracellular->set_parameter_value(10, std::max(discrepancy*10000.0, 0.0));
-        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
+        double current_value = cell->phenotype.intracellular->get_parameter_value(",10");
+        double new_value = std::max(current_value + discrepancy, 0.0);
+        cell->phenotype.intracellular->set_parameter_value(10, new_value);
+        // cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
     }
     return;
 }
@@ -157,12 +161,12 @@ void Diff_2_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
 void Diff_3_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Check if cells meets criteria
     bool cell_not_dead = !cell->phenotype.death.dead;
-    bool cell_correct_type = cell->type_name == "differentiation_cell";
+    bool cell_correct_type = cell->type_name == "default";
 
     if (cell_correct_type) {
         // TODO this is currently meaningless
         cell->phenotype.intracellular->set_parameter_value(20,std:: max(discrepancy*10000.0, 0.0));
-        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
+        // cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
     }
     return;
 }
