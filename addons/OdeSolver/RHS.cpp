@@ -122,14 +122,14 @@ void RHS::operator() ( const state_type& X , state_type& dX , const double t )
 	std::fill(dX.begin(), dX.end(), 0);
 	// EXAMPLE FOR 2 EXTERNAL AND 2 INTERNAL SUBSTRATES
 	// This changes the external values
-	dX[0] = P(00) + P(01)*(X[3]-X[0]);
-	dX[1] = P(10) + P(11)*(X[4]-X[1]);
-	dX[2] = P(20) + P(21)*(X[5]-X[2]);
+	dX[0] = P(00) + P(01)*(X[4]-X[0]);
+	dX[1] = P(10) + P(11)*(X[5]-X[1]);
+	dX[2] = P(20) + P(21)*(X[6]-X[2]);
 
 	// This changes internal and pure internal values
-	dX[3] = - P(01)*(X[3]-X[0]);
-	dX[4] = - P(11)*(X[4]-X[1]);
-	dX[5] = - P(21)*(X[5]-X[2]);
+	dX[4] = - P(01)*(X[4]-X[0]);
+	dX[5] = - P(11)*(X[5]-X[1]);
+	dX[6] = - P(21)*(X[6]-X[2]);
 
 	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
 	return;
