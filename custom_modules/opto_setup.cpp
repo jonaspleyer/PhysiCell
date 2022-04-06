@@ -23,7 +23,8 @@ void shine_light( const double& t) {
 
 void run_optogenetics ( const double& t ) {
     if (t-optogenetics_next_run_time + 0.01*minimum_time_interval > 0) {
-        optogenetics_next_run_time+=optogenetics_dt;
+        optogenetics_next_run_time += optogenetics_dt;
+        optogenetics_next_update_time += optogenetics_update_dt;
         shine_light(t);
 
     } else if (t-optogenetics_next_update_time + 0.01*minimum_time_interval > 0) {
