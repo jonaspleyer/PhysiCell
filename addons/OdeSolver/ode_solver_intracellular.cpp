@@ -323,8 +323,11 @@ double OdeSolverIntracellular::get_parameter_value(std::string name)
 		{
 			return substrate_values[ID];
 		} else {
-			return -1;
+			return 0.0;
 		}
+	} else if (name.at(0) == ',' ) {
+		int ID = std::stoi(name.substr(1));
+		return RHS_definition.P(ID);
 	} else {
 		return substrate_values[substrate_name_to_index[name]];
 	}
