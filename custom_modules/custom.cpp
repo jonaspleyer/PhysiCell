@@ -314,25 +314,31 @@ void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 	std::vector<double> densities = microenvironment.nearest_density_vector(voxel_index);
 	
 	// only for debugging
-	bool test = densities[0] > densities[1];
-	std::cout << densities << test << "\n";
+	/* bool test = densities[0] > densities[1];
+	std::cout << densities << test << "\n";*/
 
 
 	// If substrate_2 is higher than substrate_1
 	// ==> Differentiate in state 2
-	if (densities[0] > densities[1]) {
+	if (densities[0] > std::max(densities[1], densities[2])) {
+		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+	}
+
+	// If substrate_1 is higher than substrate_2
+	// ==> Differentiate in state 1
+	if (densities[1] > std::max(densities[0], densities[2])) {
 		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
 	}
 
 	// If substrate_1 is higher than substrate_2
 	// ==> Differentiate in state 1
-	if (densities[1] > densities[0]) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+	if (densities[2] > std::max(densities[0], densities[1])) {
+		pCell->custom_data["diff"] = parameters.doubles("diff_enable_3");
 	}
 
 	// Set the death rate according to the density of the killer substrate
 	int death_index = phenotype.death.find_death_model_index(100);
-	phenotype.death.rates[death_index] = std::min((densities[2] - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
+	phenotype.death.rates[death_index] = std::min((densities[3] - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
 
 	return;
 }
