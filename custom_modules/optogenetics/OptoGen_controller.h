@@ -70,14 +70,18 @@ void run_single_controller(Controller<ObservableType, DerivedT, ObservableDomain
     // Perform static cast to have access to derived class values
     auto controller_derived = static_cast<DerivedT*>(&controller);
     update_controller<ObservableType, DerivedT, ObservableDomain, EffectDomain>(*controller_derived);
+    
+    // Calculate the discrepancy which is only dependent on the controller instance
+    double discrepancy = controller_derived->controllfunctor->adjust(controller_derived->metric->state);
+    
     // Apply effect for every cell in domain of effect
     std::for_each(
         controller_derived->effect->cells_in_effect_domain.begin(),
         controller_derived->effect->cells_in_effect_domain.end(),
-        [&controller_derived](PhysiCell::Cell* cell){
+        [&controller_derived, &discrepancy](PhysiCell::Cell* cell){
             controller_derived->effect->apply(
                 cell,
-                controller_derived->controllfunctor->adjust(controller_derived->metric->state)
+                discrepancy
             );
         }
     );
