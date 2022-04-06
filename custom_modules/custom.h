@@ -67,11 +67,24 @@
 
 #include "../core/PhysiCell.h"
 #include "../modules/PhysiCell_standard_modules.h" 
+#include "../addons/OdeSolver/ode_solver_intracellular.h"
 
 using namespace BioFVM; 
 using namespace PhysiCell;
 
 // setup functions to help us along 
+
+
+class Diff_RHS : public RHS {
+    void operator() ( const state_type& X , state_type& dX , const double t );
+};
+
+
+class Diff_Intracellular : public OdeSolverIntracellular {
+public:
+    Diff_RHS RHS_definition;
+};
+
 
 void create_cell_types( void );
 void setup_tissue( void ); 
@@ -87,6 +100,9 @@ std::vector<std::string> my_coloring_function( Cell* );
 // custom functions can go here 
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
+
+void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
+
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 

@@ -97,7 +97,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>24</omp_num_threads>
+		<omp_num_threads>1</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -126,7 +126,7 @@
 	<microenvironment_setup>
 		<variable name="substrate1" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">6000.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">60.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -134,7 +134,7 @@
 
 		<variable name="substrate2" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">3000.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">30.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -142,7 +142,7 @@
 
 		<variable name="killer" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">5000.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">50.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -321,7 +321,7 @@
 			</phenotype>
 		</cell_definition>
 
-		<cell_definition name="differentiation_cell" ID="0">
+		<cell_definition name="differentiation_cell" ID="1">
 			<phenotype>
 				<cycle code="6" name="Flow cytometry model (separated)">  
 					<!-- phases are: G0/G1 , S, G2, M --> 
@@ -462,15 +462,15 @@
 					<mathml_file>./config/RHS_ODE.xml</mathml_file>
                     <intracellular_dt>0.05</intracellular_dt>
                     <substrate_int name="substrate1">
-                    	<map substrate="substrate1" mathml_species="A" />
+                    	<map substrate="substrate_diff_1" mathml_species="A1" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
                     <substrate_int name="substrate2">
-                    	<map substrate="substrate2" mathml_species="B" />
+                    	<map substrate="substrate_diff_2" mathml_species="B1" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
 					<substrate_int name="killer">
-                    	<map substrate="killer" mathml_species="C" />
+                    	<map substrate="killer_diff" mathml_species="C1" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
 				</intracellular>
@@ -494,7 +494,7 @@
 		<!-- GENERAL SETTINGS -->
 		<div_initialization type="divider" description="---Initialization settings---"/>
 		<random_seed type="int" units="dimensionless">0</random_seed>
-		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">10000</number_of_cells>
+		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">1000</number_of_cells>
 
 
 		<!-- OPTOGENETICS -->
@@ -519,14 +519,18 @@
 
 		<diff_3_speed type="double" units="micron/min">3.0</diff_3_speed>
 
-		<Target_cells_per_domain_diff_1 type="double">400</Target_cells_per_domain_diff_1>
-		<Target_cells_per_domain_diff_2 type="double">1000</Target_cells_per_domain_diff_2>
-		<Target_cells_per_domain_diff_3 type="double">200</Target_cells_per_domain_diff_3>
+		<killer_modulation>10</killer_modulation>
+		<killer_threshold>500</killer_threshold>
+
+		<Number_of_domains type="double">5</Number_of_domains>
+		<Target_cells_per_domain_diff_1 type="double">5</Target_cells_per_domain_diff_1>
+		<Target_cells_per_domain_diff_2 type="double">2</Target_cells_per_domain_diff_2>
+		<Target_cells_per_domain_diff_3 type="double">1</Target_cells_per_domain_diff_3>
 		<!-- END OPTOGENETICS -->
 
 		<!-- ODE SOLVER INTRACELLULAR -->
-		<substrate_1_production>0.0</substrate_1_production>
-		<substrate_2_production>0.0</substrate_2_production>
+		<substrate_1_production>1.0</substrate_1_production>
+		<substrate_2_production>1.0</substrate_2_production>
 		<killer_production>0.0</killer_production>
 		<!-- END ODE SOLVER INTRACELLULAR -->
 	</user_parameters>

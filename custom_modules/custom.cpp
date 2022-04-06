@@ -66,8 +66,28 @@
 */
 
 #include "./custom.h"
-#include "./optogenetics/OptoGen.h"
 #include <math.h>
+
+
+void Diff_RHS::operator() ( const state_type& X , state_type& dX , const double t )
+{
+	// EXAMPLE FOR 2 EXTERNAL AND 2 INTERNAL SUBSTRATES
+	// This changes the external values
+	// dX[0] = -P(00)*(X[3]-X[0]);
+	// dX[1] = -P(10)*(X[4]-X[1]);
+	// dX[2] = -P(20)*(X[5]-X[2]);
+
+	// This changes internal and pure internal values
+	// dX[3] = -dX[0];
+	// dX[4] = -dX[1];
+	// dX[5] = -dX[2];
+
+	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
+	std::fill(dX.begin(), dX.end(), 0);
+	std::cout << "Test\n";
+	return;
+}
+
 
 void create_cell_types( void )
 {
@@ -81,7 +101,7 @@ void create_cell_types( void )
 	   This is a good place to set default functions. 
 	*/ 
 	
-	initialize_default_cell_definition(); 
+	initialize_default_cell_definition();
 	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
 	
 	cell_defaults.functions.volume_update_function = standard_volume_update_function;
@@ -108,7 +128,7 @@ void create_cell_types( void )
 	*/
 
 	
-	cell_defaults.functions.update_phenotype = phenotype_function; 
+	cell_defaults.functions.update_phenotype = NULL; 
 	cell_defaults.functions.custom_cell_rule = custom_function; 
 	cell_defaults.functions.contact_function = contact_function; 
 	
@@ -129,9 +149,24 @@ void create_cell_types( void )
 
 void define_cell_parameters( void )
 {
+	// cell_defaults.phenotype.intracellular = new Diff_Intracellular();
 	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(01, 0.0);
 	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("killer_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(11, 0.0);
+	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("killer_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
+
+	Cell_Definition* differentiation_cell = cell_definitions_by_name["differentiation_cell"];
+
+	differentiation_cell->phenotype.intracellular->set_parameter_value(00, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(01, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(11, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(20, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(21, 0.0);
+
+	differentiation_cell->functions.update_phenotype = diff_phenotype_function;
 
 	return;
 }
@@ -170,6 +205,8 @@ void setup_tissue( void )
 	double Xrange = Xmax - Xmin; 
 	double Yrange = Ymax - Ymin; 
 	double Zrange = Zmax - Zmin; 
+
+	double frac = PhysiCell::parameters.doubles("fraction_box_height");
 	
 	// create some of each type of cell 
 	
@@ -179,15 +216,26 @@ void setup_tissue( void )
 	{
 		Cell_Definition* pCD = cell_definitions_by_index[k]; 
 		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
-		for( int n = 0 ; n < parameters.ints("number_of_cells") ; n++ )
+		int N_cells = 0;
+		if (k==0) {
+		 	N_cells = ceil(parameters.ints("number_of_cells")*frac);
+		} else if (k==1) {
+			N_cells = ceil(parameters.ints("number_of_cells")*(1-frac));
+		}
+		for( int n = 0 ; n < N_cells ; n++ )
 		{
 			std::vector<double> position = {0,0,0}; 
 			position[0] = Xmin + UniformRandom()*Xrange; 
-			position[1] = Ymin + UniformRandom()*Yrange; 
+			if (k==0) {
+				position[1] = Ymin + UniformRandom()*Yrange*frac; 
+			} else if (k==1) {
+				position[1] = Ymin + Yrange*frac + UniformRandom()*Yrange*(1-frac); 
+			}
 			position[2] = Zmin + UniformRandom()*Zrange; 
 			
 			pC = create_cell( *pCD ); 
 			pC->assign_position( position );
+			// pC->phenotype.intracellular = new Diff_Intracellular;
 		}
 	}
 	std::cout << std::endl; 
@@ -228,20 +276,24 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		output[2] = "rgb(139,69,19)";
 		output[3] = "rgb(139,69,19)";
 	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
-	{
-		output[0] = interior_color_diff_1;
-		output[2] = interior_color_diff_1;
-	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_2")) < 0.1)
-	{
-		output[0] = interior_color_diff_2;
-		output[2] = interior_color_diff_2;
-	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
-	{
-		output[0] = interior_color_diff_3;
-		output[2] = interior_color_diff_3;
+	
+	if (pCell->type_name == "differentiation_cell") {
+		output[2] = "white";
+		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
+		{
+			output[0] = interior_color_diff_1;
+			output[2] = interior_color_diff_1;
+		}
+		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_2")) < 0.1)
+		{
+			output[0] = interior_color_diff_2;
+			output[2] = interior_color_diff_2;
+		}
+		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
+		{
+			output[0] = interior_color_diff_3;
+			output[2] = interior_color_diff_3;
+		}
 	}
 
 	return output;
@@ -252,6 +304,35 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 // We want the cell to differentiate with a certain probability when enough substrate is around
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
+	return;
+}
+
+
+void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
+{
+	int voxel_index = microenvironment.nearest_voxel_index(pCell->position);
+	std::vector<double> densities = microenvironment.nearest_density_vector(voxel_index);
+	
+	// only for debugging
+	bool test = densities[0] > densities[1];
+	std::cout << densities << test << "\n";
+
+
+	// If substrate_2 is higher than substrate_1
+	// ==> Differentiate in state 2
+	if (densities[0] > densities[1]) {
+		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
+	}
+
+	// If substrate_1 is higher than substrate_2
+	// ==> Differentiate in state 1
+	if (densities[1] > densities[0]) {
+		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+	}
+
+	// Set the death rate according to the density of the killer substrate
+	int death_index = phenotype.death.find_death_model_index(100);
+	phenotype.death.rates[death_index] = std::min((densities[2] - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
 
 	return;
 }

@@ -37,7 +37,7 @@ void run_optogenetics ( const double& t ) {
 
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
-Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
+Val Diff_1_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
     int N_cells = std::count_if(
         cells.begin(),
         cells.end(),
@@ -45,8 +45,54 @@ Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<Ph
             // Check that cell is not dead
             bool cell_not_dead = !cell->phenotype.death.dead;
             // Check if cells are differentiated
-            bool cell_correct_type = fabs(cell->custom_data["diff"] - diff_enable_1) < 0.1;
-            return cell_not_dead && cell_correct_type;
+            bool cell_correct_type_1 = cell->type_name == "differentiation_cell";
+            bool cell_correct_type_2 = false;
+            if (cell_correct_type_1) {
+                cell_correct_type_2 = fabs(cell->custom_data["diff"] - diff_enable_1) < 0.1;
+            }
+            return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
+        }
+        );
+    // std::cout << "matching cells in domain: " << N_cells << std::endl;
+    return N_cells;
+}
+
+
+Val Diff_2_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
+    int N_cells = std::count_if(
+        cells.begin(),
+        cells.end(),
+        [this](PhysiCell::Cell* cell){
+            // Check that cell is not dead
+            bool cell_not_dead = !cell->phenotype.death.dead;
+            // Check if cells are differentiated
+            bool cell_correct_type_1 = cell->type_name == "differentiation_cell";
+            bool cell_correct_type_2 = false;
+            if (cell_correct_type_1) {
+                cell_correct_type_2 = fabs(cell->custom_data["diff"] - diff_enable_2) < 0.1;
+            }
+            return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
+        }
+        );
+    // std::cout << "matching cells in domain: " << N_cells << std::endl;
+    return N_cells;
+}
+
+
+Val Diff_3_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
+    int N_cells = std::count_if(
+        cells.begin(),
+        cells.end(),
+        [this](PhysiCell::Cell* cell){
+            // Check that cell is not dead
+            bool cell_not_dead = !cell->phenotype.death.dead;
+            // Check if cells are differentiated
+            bool cell_correct_type_1 = cell->type_name == "differentiation_cell";
+            bool cell_correct_type_2 = false;
+            if (cell_correct_type_1) {
+                cell_correct_type_2 = fabs(cell->custom_data["diff"] - diff_enable_3) < 0.1;
+            }
+            return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
         }
         );
     // std::cout << "matching cells in domain: " << N_cells << std::endl;
@@ -55,46 +101,56 @@ Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<Ph
 
 
 double Diff_Metric::calculate(Val& target, Val& observed) {
-    return (observed-target)/target;
+    return (target-observed)/target;
 }
 
 
 double PI_Controllfunctor::adjust(std::deque<double> state) {
     // Target is implicitly always 0.0
     // This implements a PI Controller
-    double calculated = K_p*state.back() + K_i*(state.back()-state[state.size()-1])/update_dt;
+    double calculated = K_p*state.back();
+    if (state.size()>1) {
+        calculated += K_i*(state.back()-state[state.size()-1])/update_dt;
+    }
     return calculated;
 }
 
 
-void Diff_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
+void Diff_1_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Check if cells meets criteria
-    bool cell_diff_disable = fabs(cell->custom_data["diff"] - diff_disable) < 0.1;
-    bool cell_in_diff_1 = fabs(cell->custom_data["diff"] - diff_enable_1) < 0.1;
     bool cell_not_dead = !cell->phenotype.death.dead;
+    bool cell_correct_type = cell->type_name == "differentiation_cell";
 
-    // Get a random parameter between 0 and 1
-    double rand = PhysiCell::UniformRandom();
-    // Determine threshhold via discrepancy
-    double thresh = 1/fabs(discrepancy);
-    
-    // Check that the cell is not already dead
-    if (cell_not_dead) {
-        if (discrepancy > 0.0) {
-            // If discrepancy is positive (more differentiated cells than targeted) kill some cells
-            if (rand > thresh && cell_in_diff_1) {
-                cell->start_death(cell->phenotype.death.find_death_model_index(100));
-            }
-        } else if (
-            // Check if the cell is not yet differentiated
-            cell_diff_disable && rand > 1-fabs(discrepancy)/(1+fabs(discrepancy))
-        ) {
-            // If the cell is not differentiated yet, the probability
-            // to differentiate is given by the discrepancy
-            cell->custom_data["diff"] = diff_enable_1;
-            cell->phenotype.motility.migration_speed = new_migr_speed;
-            cell->phenotype.mechanics.cell_cell_adhesion_strength = new_adh_strength;
-        }
+    if (cell_correct_type) {
+        cell->phenotype.intracellular->set_parameter_value(00, std::max(discrepancy*10000.0, 0.0));
+        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
+    }
+    return;
+}
+
+
+void Diff_2_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
+    // Check if cells meets criteria
+    bool cell_not_dead = !cell->phenotype.death.dead;
+    bool cell_correct_type = cell->type_name == "differentiation_cell";
+
+    if (cell_correct_type) {
+        cell->phenotype.intracellular->set_parameter_value(10, std::max(discrepancy*10000.0, 0.0));
+        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
+    }
+    return;
+}
+
+
+void Diff_3_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
+    // Check if cells meets criteria
+    bool cell_not_dead = !cell->phenotype.death.dead;
+    bool cell_correct_type = cell->type_name == "differentiation_cell";
+
+    if (cell_correct_type) {
+        // TODO this is currently meaningless
+        cell->phenotype.intracellular->set_parameter_value(20,std:: max(discrepancy*10000.0, 0.0));
+        cell->phenotype.intracellular->set_parameter_value(20, -std::min(discrepancy*1000.0, 0.0));
     }
     return;
 }
@@ -115,40 +171,30 @@ void setup_optogenetics( void ) {
     // Create individual domains for controll and effect
     std::vector<std::array<Kernel::Iso_cuboid_3, 2>> diff_domains{};
     
-    int size=1;
-    for (int i=0; i<size; i++) 
+    double x0 = BioFVM::microenvironment.mesh.bounding_box[0];
+    double y0 = BioFVM::microenvironment.mesh.bounding_box[1];
+    double z0 = BioFVM::microenvironment.mesh.bounding_box[2];
+
+    double x1 = BioFVM::microenvironment.mesh.bounding_box[3];
+    double y1 = BioFVM::microenvironment.mesh.bounding_box[4];
+    double z1 = BioFVM::microenvironment.mesh.bounding_box[5];
+
+    double frac = PhysiCell::parameters.doubles("fraction_box_height");
+
+    double size=PhysiCell::parameters.doubles("Number_of_domains");
+    for (double i=0; i<size; i++) 
     {
         std::array<Kernel::Iso_cuboid_3, 2> _doms = {
             // Observable domain
             Kernel::Iso_cuboid_3(
-                Kernel::Point_3(
-                    BioFVM::microenvironment.mesh.bounding_box[0],
-                    BioFVM::microenvironment.mesh.bounding_box[1] + 
-                        PhysiCell::parameters.doubles("fraction_box_height")
-                        *(BioFVM::microenvironment.mesh.bounding_box[4] - BioFVM::microenvironment.mesh.bounding_box[1]),
-                    BioFVM::microenvironment.mesh.bounding_box[2]
-                ),
-                Kernel::Point_3(
-                    BioFVM::microenvironment.mesh.bounding_box[3],
-                    BioFVM::microenvironment.mesh.bounding_box[4],
-                    BioFVM::microenvironment.mesh.bounding_box[5]
-                )
+                Kernel::Point_3(x0 + i/size*(x1-x0), y0 + frac*(y1-y0), z0),
+                Kernel::Point_3(x0 + (i+1.0)/size*(x1-x0), y1, z1)
             ),
             // Effect domain
             _doms[1] = 
             Kernel::Iso_cuboid_3(
-                Kernel::Point_3(
-                    BioFVM::microenvironment.mesh.bounding_box[0],
-                    BioFVM::microenvironment.mesh.bounding_box[1],
-                    BioFVM::microenvironment.mesh.bounding_box[2]
-                ),
-                Kernel::Point_3(
-                    BioFVM::microenvironment.mesh.bounding_box[3],
-                    BioFVM::microenvironment.mesh.bounding_box[1] + 
-                        PhysiCell::parameters.doubles("fraction_box_height")
-                        *(BioFVM::microenvironment.mesh.bounding_box[4] - BioFVM::microenvironment.mesh.bounding_box[1]),
-                    BioFVM::microenvironment.mesh.bounding_box[5]
-                )
+                Kernel::Point_3(x0 + i/size*(x1-x0), y0, z0),
+                Kernel::Point_3(x0 + (i+1.0)/size*(x1-x0), y0 + frac*(y1-y0), z1)
             )
         };
         diff_domains.push_back(_doms);
@@ -156,7 +202,7 @@ void setup_optogenetics( void ) {
 
     int i = 0;
     for (auto const& [_observable_domain, _effect_domain] : diff_domains) {
-        auto cont = new Diff_Controller(
+        auto cont1 = new Diff_1_Controller(
             // Observable and Effect Domain
             // Kernel::Iso_cuboid_3(Kernel::Point_3(-150.0, -150.0, -10.0), Kernel::Point_3(150.0, 150.0, 10.0)),
             _observable_domain,
@@ -164,7 +210,27 @@ void setup_optogenetics( void ) {
             // Target: How many differentiated cells do we want to have?
             PhysiCell::parameters.doubles("Target_cells_per_domain_diff_1")
         );
-        supervisor.add_controller("Diff_Controller_diff_1_" + std::to_string(i), cont);
+        supervisor.add_controller("Diff_Controller_diff_1_" + std::to_string(i), cont1);
+
+        auto cont2 = new Diff_2_Controller(
+            // Observable and Effect Domain
+            // Kernel::Iso_cuboid_3(Kernel::Point_3(-150.0, -150.0, -10.0), Kernel::Point_3(150.0, 150.0, 10.0)),
+            _observable_domain,
+            _effect_domain,
+            // Target: How many differentiated cells do we want to have?
+            PhysiCell::parameters.doubles("Target_cells_per_domain_diff_2")
+        );
+        supervisor.add_controller("Diff_Controller_diff_2_" + std::to_string(i), cont2);
+
+        /* auto cont3 = new Diff_3_Controller(
+            // Observable and Effect Domain
+            // Kernel::Iso_cuboid_3(Kernel::Point_3(-150.0, -150.0, -10.0), Kernel::Point_3(150.0, 150.0, 10.0)),
+            _observable_domain,
+            _effect_domain,
+            // Target: How many differentiated cells do we want to have?
+            PhysiCell::parameters.doubles("Target_cells_per_domain_diff_3")
+        );
+        supervisor.add_controller("Diff_Controller_diff_3_" + std::to_string(i), cont3);*/
         i++;
     }
 
