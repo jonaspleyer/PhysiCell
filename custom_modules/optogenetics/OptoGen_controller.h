@@ -134,9 +134,8 @@ public:
 //    on cells
 template<typename ObservableType, class DerivedT, class ObservableDomain, class EffectDomain>
 class Controller : public ControllerElement {
-private:
-    int state_max_size = 500;
 public:
+    int state_max_size = 500;
     std::unique_ptr<Observable<ObservableDomain, ObservableType>> observable{};
     ObservableType target{};
     std::unique_ptr<Metric<ObservableType>> metric{};
@@ -165,6 +164,7 @@ public:
         if (derived->metric->state.size() >= derived->state_max_size) {
             derived->metric->state.erase(derived->metric->state.begin());
         }
+        // We can call observable->state.back() because we already updated this state in the previous step
         derived->metric->state.push_back(derived->metric->calculate(derived->target, derived->observable->state.back()));
     }
 };
