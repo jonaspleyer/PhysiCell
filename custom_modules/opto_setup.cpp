@@ -105,13 +105,21 @@ double Diff_Metric::calculate(Val& target, Val& observed) {
 }
 
 
-double PI_Controllfunctor::adjust(std::deque<double> state) {
+double PID_Controllfunctor::adjust(std::deque<double> state) {
     // Target is implicitly always 0.0
-    // This implements a PI Controller
+    // This implements a PID Controller
     double calculated = K_p*state.back();
     if (state.size()>1) {
-        calculated += K_i*(state.back()-state[state.size()-1])/update_dt;
+        calculated += K_d*(state.back()-state[state.size()-1])/update_dt;
     }
+    if (state.size()>1) {
+        calculated += K_i*update_dt*std::accumulate(
+            state.begin(),
+            state.end(),
+            0.0
+        );
+    }
+    std::cout << "Calculated: " << calculated << "\n";
     return calculated;
 }
 
