@@ -1,7 +1,7 @@
 #include "opto_setup.h"
 #include <cmath>
 #include <random>
-#include <chrono>
+#include <stdio.h>
 
 double optogenetics_dt = 0.0;
 double optogenetics_next_run_time = 0.0;
@@ -95,31 +95,36 @@ Val Diff_3_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<
             return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
         }
         );
-    // std::cout << "matching cells in domain: " << N_cells << std::endl;
     return N_cells;
 }
 
 
 double Diff_Metric::calculate(Val& target, Val& observed) {
-    return (target-observed)/target;
+    return (target-observed);
 }
 
 
 double PID_Controllfunctor::adjust(std::deque<double> state) {
     // Target is implicitly always 0.0
-    // This implements a PID Controller
+    // This implements a PI Controller
     double calculated = K_p*state.back();
+    double prop = calculated;
+    double differential = 0;
+    double integral = 0;
+    
     if (state.size()>1) {
-        calculated += K_d*(state.back()-state[state.size()-1])/update_dt;
+        differential = K_d*(state.back()-state[state.size()-2])/update_dt;
+        calculated += differential;
     }
     if (state.size()>1) {
-        calculated += K_i*update_dt*std::accumulate(
+        integral = K_i*update_dt*std::accumulate(
             state.begin(),
             state.end(),
             0.0
         );
+        calculated += integral;
     }
-    std::cout << "Calculated: " << calculated << "\n";
+    fprintf(stderr, "Prop: %E Diff: %E Int: %E Calc: %E sSize: %2d LastState: %2E\n", prop, differential, integral, calculated, state.size(), state.back());
     return calculated;
 }
 

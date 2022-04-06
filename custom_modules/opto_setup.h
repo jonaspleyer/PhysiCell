@@ -26,13 +26,15 @@ struct Red_LED : public Opto::Light::LightSource {
 class PID_Controllfunctor : public Opto::Controller::ControllFunctor {
 	public:
 		// Proportional multiplication constant
-		double K_p = 0.001;
-		// Differential multiplication constant
-		double K_d = 0.01;
-		// Integral multiplication constant
-		double K_i = 0.001;
-		// Number of steps to calculate integral over
-		int integral_steps = 20;
+		double K_p = PhysiCell::parameters.doubles("pid_controller_time_proportional");
+		// Differential multiplication constant K_d = K_p * T_d
+		// where T_d is a derivation time constant with which the controller will attempt to
+		// approach the set point.
+		double K_d = K_p * PhysiCell::parameters.doubles("pid_controller_time_differential");
+		// Integral multiplication constant K_i = K_d  / T_i
+		// where T_i is a integration time constant which describes how long the controller 
+		// will consistently "permit" values higher/lower than expected.
+		double K_i = K_p / PhysiCell::parameters.doubles("pid_controller_time_integral");
 		// Time constant between update steps
 		double update_dt = PhysiCell::parameters.doubles("optogenetics_update_dt");
 		double adjust(std::deque<double> state);
@@ -111,6 +113,7 @@ public:
 		target = _target;
 	}
 
+	int state_max_size = 10000;
 	Kernel::Iso_cuboid_3 domain;
 	std::unique_ptr<Diff_1_ObservableCuboid> observable = std::make_unique<Diff_1_ObservableCuboid>();
     Val target{};
@@ -132,6 +135,7 @@ public:
 		target = _target;
 	}
 
+	int state_max_size = 10000;
 	Kernel::Iso_cuboid_3 domain;
 	std::unique_ptr<Diff_2_ObservableCuboid> observable = std::make_unique<Diff_2_ObservableCuboid>();
     Val target{};
@@ -153,6 +157,7 @@ public:
 		target = _target;
 	}
 
+	int state_max_size = 10000;
 	Kernel::Iso_cuboid_3 domain;
 	std::unique_ptr<Diff_3_ObservableCuboid> observable = std::make_unique<Diff_3_ObservableCuboid>();
     Val target{};
