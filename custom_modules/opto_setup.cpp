@@ -54,7 +54,6 @@ Val Diff_1_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<
             return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
         }
         );
-    // std::cout << "matching cells in domain: " << N_cells << std::endl;
     return N_cells;
 }
 
@@ -75,7 +74,6 @@ Val Diff_2_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<
             return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
         }
         );
-    // std::cout << "matching cells in domain: " << N_cells << std::endl;
     return N_cells;
 }
 
