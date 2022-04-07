@@ -150,21 +150,27 @@ void create_cell_types( void )
 void define_cell_parameters( void )
 {
 	// cell_defaults.phenotype.intracellular = new Diff_Intracellular();
-	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_target_intracellular"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(01, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(02, parameters.doubles("substrate_1_multiplier_intracellular"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_target_intracellular"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(11, 0.0);
+	cell_defaults.phenotype.intracellular->set_parameter_value(12, parameters.doubles("substrate_2_multiplier_intracellular"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("killer_production"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
+	cell_defaults.phenotype.intracellular->set_parameter_value(22, 0.0);
 
 	Cell_Definition* differentiation_cell = cell_definitions_by_name["differentiation_cell"];
 
 	differentiation_cell->phenotype.intracellular->set_parameter_value(00, 0.0);
 	differentiation_cell->phenotype.intracellular->set_parameter_value(01, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(02, 0.0);
 	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0);
 	differentiation_cell->phenotype.intracellular->set_parameter_value(11, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(12, 0.0);
 	differentiation_cell->phenotype.intracellular->set_parameter_value(20, 0.0);
 	differentiation_cell->phenotype.intracellular->set_parameter_value(21, 0.0);
+	differentiation_cell->phenotype.intracellular->set_parameter_value(22, 0.0);
 
 	differentiation_cell->functions.update_phenotype = diff_phenotype_function;
 

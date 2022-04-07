@@ -126,7 +126,7 @@
 	<microenvironment_setup>
 		<variable name="substrate1" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">300.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">500.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -135,7 +135,7 @@
 
 		<variable name="substrate2" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">600.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">1000.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -510,11 +510,11 @@
 
 
 		<!-- OPTOGENETICS -->
-		<optogenetics_update_dt type="double" units="min">5</optogenetics_update_dt>
-		<optogenetics_dt type="double" units="min">40</optogenetics_dt>
+		<optogenetics_update_dt type="double" units="min">100</optogenetics_update_dt>
+		<optogenetics_dt type="double" units="min">100</optogenetics_dt>
 
 		<!-- USED FOR RECTANGLE FOR OPTOGENETIC CONTROLLERS -->
-		<fraction_box_height>0.6</fraction_box_height>
+		<fraction_box_height>0.4</fraction_box_height>
 
 		<!-- USED FOR OPTOGENETIC DIFFERENTIATION CONTROLLER -->
 		<diff_start type="double">-1.0</diff_start>
@@ -524,29 +524,22 @@
 		<diff_enable_2 type="double">2.0</diff_enable_2>
 		<diff_enable_3 type="double">3.0</diff_enable_3>
 
-		<diff_1_migration_speed type="double">0.2</diff_1_migration_speed>
-		<diff_1_adhesion_strength type="double">1.5</diff_1_adhesion_strength>
- 
-		<diff_2_volume_multiplier type="double">2.5</diff_2_volume_multiplier>
-
-		<diff_3_speed type="double" units="micron/min">3.0</diff_3_speed>
-
 		<killer_modulation>10</killer_modulation>
 		<killer_threshold>500</killer_threshold>
 
 		<Number_of_domains type="double">1</Number_of_domains>
-		<Target_cells_per_domain_diff_1 type="double">150</Target_cells_per_domain_diff_1>
-		<Target_cells_per_domain_diff_2 type="double">250</Target_cells_per_domain_diff_2>
-		<Target_cells_per_domain_diff_3 type="double">0</Target_cells_per_domain_diff_3>
+		<Target_cell_ratio_diff_1_to_diff_2 type="double">1.5</Target_cell_ratio_diff_1_to_diff_2>
 
-		<pid_controller_time_proportional type="double">5.0</pid_controller_time_proportional>
-		<pid_controller_time_differential type="double">10.0</pid_controller_time_differential>
-		<pid_controller_time_integral type="double">50.0</pid_controller_time_integral>
+		<pid_controller_time_proportional type="double">0.1</pid_controller_time_proportional>
+		<pid_controller_time_differential type="double">2.0</pid_controller_time_differential>
+		<pid_controller_time_integral type="double">20.0</pid_controller_time_integral>
 		<!-- END OPTOGENETICS -->
 
 		<!-- ODE SOLVER INTRACELLULAR -->
-		<substrate_1_production>0.0</substrate_1_production>
-		<substrate_2_production>0.0</substrate_2_production>
+		<substrate_1_target_intracellular>20.0</substrate_1_target_intracellular>
+		<substrate_2_target_intracellular>10.0</substrate_2_target_intracellular>
+		<substrate_1_multiplier_intracellular>0.01</substrate_1_multiplier_intracellular>
+		<substrate_2_multiplier_intracellular>0.01</substrate_2_multiplier_intracellular>
 		<killer_production>0.0</killer_production>
 		<!-- END ODE SOLVER INTRACELLULAR -->
 	</user_parameters>
