@@ -71,28 +71,38 @@
 
 typedef std::vector<double> state_type;
 
+
+// Class that yields the differential via operator()
 class RHS
 {
 private:
+	// Store values for calculation of ODEs
 	std::vector<double> id_to_val;
 	std::map<std::string, double> name_to_val;
 
+	// Private functions for parameter management
 	void add_parameter(std::string name, double value);
 	void add_parameter(int id, double value);
 	void change_parameter(std::string name, double value);
 	void change_parameter(int id, double value);
 
 public:
+	// Can be set externally to indice maximum number
+	// of substrates to avoid overflows
 	int N_ext;
 	int N_int;
 
 	bool initialized;
 
+	// methods to obtain parameter values (mostly used
+	// for internal solving purposes; thus the short name)
 	double P(std::string name);
 	double P(int id);
 
+	// Control parameter values from outside
 	void set_parameter(std::string name, double value);
 	void set_parameter(int id, double value);
 
+	// Actually yield the differential
     void operator() ( const state_type& x , state_type& dxdt , const double dt );
 };

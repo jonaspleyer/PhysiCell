@@ -14,7 +14,8 @@ typedef void (*update_func)(const std::vector<double> &X, std::vector<double> &d
 class OdeSolverIntracellular : public PhysiCell::Intracellular
 {
  private:
-	// The following maps are used to jump between PhysiCell_settings.xml, the mathml_file and internal definitions
+	// The following maps are used to jump between PhysiCell_settings.xml,
+	// the mathml_file and internal definitions
 	// DEFINITIONS:
 	// - substrate_name (PhysiCell_settings.xml): name of secreted substrate
 	// - index (internal):
