@@ -10,7 +10,7 @@ void shine_light( const double& t);
 void run_optogenetics ( const double &t );
 
 
-typedef std::array<double, 2> Val;
+typedef double Val;
 
 
 // *********************************************************************************
@@ -79,7 +79,7 @@ public:
 		target = _target;
 	}
 
-	int state_max_size = 10000;
+	int state_max_size = 20000;
 	Kernel::Iso_cuboid_3 domain;
 	std::unique_ptr<Diff_ObservableCuboid> observable = std::make_unique<Diff_ObservableCuboid>();
     Val target{};

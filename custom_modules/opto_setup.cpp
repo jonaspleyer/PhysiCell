@@ -39,46 +39,26 @@ void run_optogenetics ( const double& t ) {
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
 Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
-    double N_cells_diff_1 = std::count_if(
+    int count = 0;
+    double average_substrate_density = std::accumulate(
         cells.begin(),
         cells.end(),
-        [this](PhysiCell::Cell* cell){
+        0.0,
+        [this, &count](double sum, PhysiCell::Cell* cell) {
             // Check that cell is not dead
-            bool cell_not_dead = !cell->phenotype.death.dead;
-            // Check if cells are differentiated
-            bool cell_correct_type_1 = cell->type_name == "differentiation_cell";
-            bool cell_correct_type_2 = false;
-            if (cell_correct_type_1) {
-                cell_correct_type_2 = fabs(cell->custom_data["diff"] - diff_enable_1) < 0.1;
+            // If cell is of wrong type return 0
+            if (cell->phenotype.death.dead) {
+                return std::move(sum);
+            } else if (cell->type_name != "differentiation_cell") {
+                return std::move(sum);
+            } else {
+                count += 1;
+                return std::move(sum) + cell->phenotype.intracellular->get_parameter_value(".0");
             }
-            return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
         }
         );
-    double N_cells_diff_2 = std::count_if(
-        cells.begin(),
-        cells.end(),
-        [this](PhysiCell::Cell* cell){
-            // Check that cell is not dead
-            bool cell_not_dead = !cell->phenotype.death.dead;
-            // Check if cells are differentiated
-            bool cell_correct_type_1 = cell->type_name == "differentiation_cell";
-            bool cell_correct_type_2 = false;
-            if (cell_correct_type_1) {
-                cell_correct_type_2 = fabs(cell->custom_data["diff"] - diff_enable_2) < 0.1;
-            }
-            return cell_not_dead && cell_correct_type_1 && cell_correct_type_2;
-        }
-        );
-    Val ret = {N_cells_diff_1, N_cells_diff_2};
-    /* if (N_cells_diff_2 > 0) {
-        ret = N_cells_diff_1/N_cells_diff_2;
-    } else if (N_cells_diff_1 > 0) {
-        ret = N_cells_diff_1;
-    } else {
-        ret = 1.0;
-    }*/
-    // std::cout << N_cells_diff_1 << " " << N_cells_diff_2 << " " << ret << "\n";
-    return ret;
+    std::cout << count << " " << average_substrate_density/count << std::endl;
+    return average_substrate_density/count;
 }
 
 
@@ -92,27 +72,16 @@ void Diff_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // And reduce production of substrate2
     if (cell_correct_type) {
         double current_value_1 = cell->phenotype.intracellular->get_parameter_value(",00");
-        double current_value_2 = cell->phenotype.intracellular->get_parameter_value(",10");
         // std::cout << current_value_1 << " " << current_value_2 << std::endl;
         double new_value_1 = std::max(current_value_1 + discrepancy, 0.0);
-        double new_value_2 = std::max(current_value_2 - discrepancy, 0.0);
         cell->phenotype.intracellular->set_parameter_value(00, new_value_1);
-        cell->phenotype.intracellular->set_parameter_value(10, new_value_2);
     }
     return;
 }
 
 
 double Diff_Metric::calculate(Val& target, Val& observed) {
-    // double res = fmin(fabs(target[0]/target[1]), fabs(target[1]/target[0])) - fmin(fabs(observed[0]/observed[1]), fabs(observed[1]/observed[0]));
-    double res = 1.0;
-    if (observed[0] > observed[1]) {
-        res = observed[1]/observed[0]/(target[1]/target[0]) - 1;
-    } else if (observed[1] > observed[0]) {
-        res = 1 - observed[0]/observed[1]/(target[0]/target[1]);
-    }
-    std::cout << target[0] << " " << target[1] << " " << observed[0] << " " << observed[1] << " " << res << "\n";
-    return res;
+    return target-observed;
 }
 
 
@@ -125,10 +94,10 @@ double PID_Controllfunctor::adjust(std::deque<double> state) {
     double integral = 0;
     
     if (state.size()>1) {
-        differential = K_d*(state.back()-state[state.size()-2])/update_dt;
+        differential = K_d*(state.back()-state.end()[-2])/update_dt;
         calculated += differential;
     }
-    if (state.size()>1) {
+    if (state.size()>10) {
         integral = K_i*update_dt*std::accumulate(
             state.begin(),
             state.end(),
@@ -159,13 +128,12 @@ void setup_optogenetics( void ) {
     // Create individual domains for controll and effect
     std::vector<std::array<Kernel::Iso_cuboid_3, 2>> diff_domains{};
     
-    double x0 = BioFVM::microenvironment.mesh.bounding_box[0];
-    double y0 = BioFVM::microenvironment.mesh.bounding_box[1];
-    double z0 = BioFVM::microenvironment.mesh.bounding_box[2];
-
-    double x1 = BioFVM::microenvironment.mesh.bounding_box[3];
-    double y1 = BioFVM::microenvironment.mesh.bounding_box[4];
-    double z1 = BioFVM::microenvironment.mesh.bounding_box[5];
+    double x0 = BioFVM::microenvironment.mesh.bounding_box[0] - BioFVM::microenvironment.mesh.dx;
+    double y0 = BioFVM::microenvironment.mesh.bounding_box[1] - BioFVM::microenvironment.mesh.dy;
+    double z0 = BioFVM::microenvironment.mesh.bounding_box[2] - BioFVM::microenvironment.mesh.dz;
+    double x1 = BioFVM::microenvironment.mesh.bounding_box[3] + BioFVM::microenvironment.mesh.dx;
+    double y1 = BioFVM::microenvironment.mesh.bounding_box[4] + BioFVM::microenvironment.mesh.dy;
+    double z1 = BioFVM::microenvironment.mesh.bounding_box[5] + BioFVM::microenvironment.mesh.dz;
 
     double frac = PhysiCell::parameters.doubles("fraction_box_height");
 
@@ -188,7 +156,7 @@ void setup_optogenetics( void ) {
         diff_domains.push_back(_doms);
     };
 
-    Val target = {PhysiCell::parameters.doubles("Target_cell_ratio_diff_1_to_diff_2"), 1.0};
+    Val target = PhysiCell::parameters.doubles("substrate_1_target_intracellular");
     int i = 0;
     for (auto const& [_observable_domain, _effect_domain] : diff_domains) {
         auto cont1 = new Diff_Controller(

@@ -67,6 +67,7 @@
 
 #include "./custom.h"
 #include <math.h>
+#include "tinycolormap/include/tinycolormap.hpp"
 
 
 void Diff_RHS::operator() ( const state_type& X , state_type& dX , const double t )
@@ -149,29 +150,46 @@ void create_cell_types( void )
 
 void define_cell_parameters( void )
 {
-	// cell_defaults.phenotype.intracellular = new Diff_Intracellular();
-	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_target_intracellular"));
+	// These cells will produce optogenetically induced substrate
+	// substrate_1
+	cell_defaults.phenotype.intracellular->set_parameter_value(00, parameters.doubles("substrate_1_production_rate"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(01, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(02, parameters.doubles("substrate_1_multiplier_intracellular"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_target_intracellular"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(03, 0.0);
+	// substrate_2
+	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production_rate"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(11, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(12, parameters.doubles("substrate_2_multiplier_intracellular"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("killer_production"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(13, 0.0);
+	// substrate_3
+	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("substrate_3_production_rate"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(22, 0.0);
+	cell_defaults.phenotype.intracellular->set_parameter_value(23, 0.0);
+	// killer substrate
+	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("killer_production_rate"));
+	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
+	cell_defaults.phenotype.intracellular->set_parameter_value(23, 0.0);
 
+	// Cells that differentiate
 	Cell_Definition* differentiation_cell = cell_definitions_by_name["differentiation_cell"];
+	// substrate_1
+	differentiation_cell->phenotype.intracellular->set_parameter_value(00, 0.0); // production_rate
+	differentiation_cell->phenotype.intracellular->set_parameter_value(01, parameters.doubles("substrate_1_uptake_rate"));
+	differentiation_cell->phenotype.intracellular->set_parameter_value(03, parameters.doubles("substrate_1_turnover_rate"));
+	// substrate_2
+	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0); // production_rate
+	differentiation_cell->phenotype.intracellular->set_parameter_value(11, parameters.doubles("substrate_2_uptake_rate"));
+	differentiation_cell->phenotype.intracellular->set_parameter_value(13, parameters.doubles("substrate_2_turnover_rate"));
+	// substrate_3
+	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0); // production_rate
+	differentiation_cell->phenotype.intracellular->set_parameter_value(11, parameters.doubles("substrate_3_uptake_rate"));
+	differentiation_cell->phenotype.intracellular->set_parameter_value(13, parameters.doubles("substrate_3_turnover_rate"));
+	// killer substrate
+	differentiation_cell->phenotype.intracellular->set_parameter_value(30, 0.0); // production_rate
+	differentiation_cell->phenotype.intracellular->set_parameter_value(31, parameters.doubles("killer_uptake_rate"));
+	differentiation_cell->phenotype.intracellular->set_parameter_value(33, parameters.doubles("killer_turnover_rate"));
 
-	differentiation_cell->phenotype.intracellular->set_parameter_value(00, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(01, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(02, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(11, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(12, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(20, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(21, 0.0);
-	differentiation_cell->phenotype.intracellular->set_parameter_value(22, 0.0);
+	
 
+	// Differentiate with respect to density of substrates
 	differentiation_cell->functions.update_phenotype = diff_phenotype_function;
 
 	return;
@@ -283,7 +301,7 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		output[3] = "rgb(139,69,19)";
 	}
 	
-	if (pCell->type_name == "differentiation_cell") {
+	/* if (pCell->type_name == "differentiation_cell") {
 		output[2] = "white";
 		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
 		{
@@ -300,6 +318,13 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 			output[0] = interior_color_diff_3;
 			output[2] = interior_color_diff_3;
 		}
+	}*/
+	double low = 0.0;
+	double high = 0.4;
+	if (pCell->type_name == "differentiation_cell") {
+		double value = (fmax(low, fmin(high, pCell->phenotype.intracellular->get_parameter_value(".0")))-low)/(high-low);
+		const tinycolormap::Color color = 255.0*tinycolormap::GetColor(value, tinycolormap::ColormapType::Viridis);
+		output[2] = "rgb(" + std::to_string(color.r()) + "," + std::to_string(color.g()) + "," + std::to_string(color.b()) + ")";
 	}
 
 	return output;
