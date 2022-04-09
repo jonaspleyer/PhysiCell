@@ -301,7 +301,7 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		output[3] = "rgb(139,69,19)";
 	}
 	
-	/* if (pCell->type_name == "differentiation_cell") {
+	if (pCell->type_name == "differentiation_cell") {
 		output[2] = "white";
 		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
 		{
@@ -318,14 +318,14 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 			output[0] = interior_color_diff_3;
 			output[2] = interior_color_diff_3;
 		}
-	}*/
-	double low = 0.0;
+	}
+	/* double low = 0.0;
 	double high = 0.4;
 	if (pCell->type_name == "differentiation_cell") {
 		double value = (fmax(low, fmin(high, pCell->phenotype.intracellular->get_parameter_value(".0")))-low)/(high-low);
 		const tinycolormap::Color color = 255.0*tinycolormap::GetColor(value, tinycolormap::ColormapType::Viridis);
 		output[2] = "rgb(" + std::to_string(color.r()) + "," + std::to_string(color.g()) + "," + std::to_string(color.b()) + ")";
-	}
+	}*/
 
 	return output;
 
@@ -341,36 +341,33 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
-	int voxel_index = microenvironment.nearest_voxel_index(pCell->position);
-	std::vector<double> densities = microenvironment.nearest_density_vector(voxel_index);
-	
-	// only for debugging
-	/* bool test = densities[0] > densities[1];
-	std::cout << densities << test << "\n";*/
-
+	pCell->custom_data["diff"] = parameters.doubles("diff_disable");
 
 	// If substrate_2 is higher than substrate_1
 	// ==> Differentiate in state 2
-	if (densities[0] > std::max(densities[1], densities[2])) {
+	double sub_1_internal = pCell->phenotype.intracellular->get_parameter_value(".0");
+
+	if (sub_1_internal > parameters.doubles("substrate_1_thresh_1")) {
 		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
 	}
 
 	// If substrate_1 is higher than substrate_2
 	// ==> Differentiate in state 1
-	if (densities[1] > std::max(densities[0], densities[2])) {
+	if (sub_1_internal > parameters.doubles("substrate_1_thresh_2")) {
 		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
 	}
 
 	// If substrate_1 is higher than substrate_2
 	// ==> Differentiate in state 1
-	if (densities[2] > std::max(densities[0], densities[1])) {
+	if (sub_1_internal > parameters.doubles("substrate_1_thresh_3")) {
 		pCell->custom_data["diff"] = parameters.doubles("diff_enable_3");
 	}
 
 	// Set the death rate according to the density of the killer substrate
-	int death_index = phenotype.death.find_death_model_index(100);
-	phenotype.death.rates[death_index] = std::min((densities[3] - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
-
+	/* int death_index = phenotype.death.find_death_model_index(100);
+	double killer_internal = pCell->phenotype.intracellular->get_parameter_value(".3");
+	phenotype.death.rates[death_index] = std::min((killer_internal - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);*/
+	
 	return;
 }
 

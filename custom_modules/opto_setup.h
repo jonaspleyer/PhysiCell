@@ -46,6 +46,7 @@ class Diff_ObservableCuboid : public Opto::Controller::Observable<Val, Kernel::I
 		double diff_disable = PhysiCell::parameters.doubles("diff_disable");
 		double diff_enable_1 = PhysiCell::parameters.doubles("diff_enable_1");
 		double diff_enable_2 = PhysiCell::parameters.doubles("diff_enable_2");
+		double diff_enable_3 = PhysiCell::parameters.doubles("diff_enable_3");
 		Kernel::Iso_cuboid_3 domain;
 		Val measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) override;
 };

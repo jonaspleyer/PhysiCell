@@ -39,26 +39,25 @@ void run_optogenetics ( const double& t ) {
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
 Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
-    int count = 0;
-    double average_substrate_density = std::accumulate(
+    int N_cells_diff_3 = std::count_if(
         cells.begin(),
         cells.end(),
-        0.0,
-        [this, &count](double sum, PhysiCell::Cell* cell) {
+        [this](PhysiCell::Cell* cell) {
             // Check that cell is not dead
             // If cell is of wrong type return 0
             if (cell->phenotype.death.dead) {
-                return std::move(sum);
+                return false;
+            // Test if the cell would be 
             } else if (cell->type_name != "differentiation_cell") {
-                return std::move(sum);
+                return false;
             } else {
-                count += 1;
-                return std::move(sum) + cell->phenotype.intracellular->get_parameter_value(".0");
+                double diff = cell->custom_data["diff"];
+                // We return the likelyhood that a cell can differentiate
+                return fabs(diff - diff_enable_3) < 0.1;
             }
         }
         );
-    std::cout << count << " " << average_substrate_density/count << std::endl;
-    return average_substrate_density/count;
+    return N_cells_diff_3;
 }
 
 
@@ -156,7 +155,7 @@ void setup_optogenetics( void ) {
         diff_domains.push_back(_doms);
     };
 
-    Val target = PhysiCell::parameters.doubles("substrate_1_target_intracellular");
+    Val target = PhysiCell::parameters.doubles("target_diff_3_N_cells");
     int i = 0;
     for (auto const& [_observable_domain, _effect_domain] : diff_domains) {
         auto cont1 = new Diff_Controller(
