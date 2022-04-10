@@ -198,7 +198,7 @@
 				
 				<death>  
 					<model code="100" name="apoptosis"> 
-						<death_rate units="1/min">0.0</death_rate>
+						<death_rate units="1/min">1.0e-06</death_rate>
 						<!-- use phase_transition_rates OR phase_durations -->
 						<!--
 						<phase_transition_rates units="1/min">
@@ -339,13 +339,13 @@
 					<!-- use phase_transition_rates OR phase_durations -->
 
 					<phase_transition_rates units="1/min">
-						<rate start_index="0" end_index="1" fixed_duration="false">2e-05</rate>
+						<rate start_index="0" end_index="1" fixed_duration="false">1e-05</rate>
 					</phase_transition_rates>
 				</cycle>
 				
 				<death>  
 					<model code="100" name="apoptosis"> 
-						<death_rate units="1/min">5.31667e-08</death_rate>
+						<death_rate units="1/min">1e-05</death_rate>
 						<!-- use phase_transition_rates OR phase_durations -->
 						<!--
 						<phase_transition_rates units="1/min">
@@ -420,7 +420,7 @@
 				</mechanics>
 				
 				<motility>  
-					<speed units="micron/min">0.0</speed>
+					<speed units="micron/min">0.2</speed>
 					<persistence_time units="min">1</persistence_time>
 					<migration_bias units="dimensionless">.5</migration_bias>
 					
@@ -509,31 +509,27 @@
 		<diff_enable_2 type="double">2.0</diff_enable_2>
 		<diff_enable_3 type="double">3.0</diff_enable_3>
 
-		<substrate_1_thresh_1 type="double">0.00015</substrate_1_thresh_1>
+		<substrate_1_thresh_1 type="double">0.001</substrate_1_thresh_1>
 		<substrate_1_thresh_2 type="double">0.02</substrate_1_thresh_2>
 		<substrate_1_thresh_3 type="double">1.0</substrate_1_thresh_3>
 
-		<substrate_1_sigma_1 type="double">0.05</substrate_1_sigma_1>
-		<substrate_1_sigma_2 type="double">0.05</substrate_1_sigma_2>
-		<substrate_1_sigma_3 type="double">0.05</substrate_1_sigma_3>
-
-		<killer_modulation>10</killer_modulation>
-		<killer_threshold>500</killer_threshold>
+		<killer_modulation>50</killer_modulation>
+		<killer_threshold>00</killer_threshold>
 
 		<Number_of_domains type="double">1</Number_of_domains>
 
-		<pid_controller_time_proportional type="double">0.1</pid_controller_time_proportional>
+		<pid_controller_time_proportional type="double">5.0</pid_controller_time_proportional>
 		<pid_controller_time_differential type="double">10</pid_controller_time_differential>
 		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
 
 		<target_diff_1_N_cells>0.0</target_diff_1_N_cells>
 		<target_diff_2_N_cells>0.0</target_diff_2_N_cells>
-		<target_diff_3_N_cells>200.0</target_diff_3_N_cells>
+		<target_diff_3_N_cells>30.0</target_diff_3_N_cells>
 		<target_killer_N_cells>0.0</target_killer_N_cells>
 		<!-- END OPTOGENETICS -->
 
 		<!-- ODE SOLVER INTRACELLULAR -->
-		<substrate_1_production_rate type="double" units="1/min">0.01</substrate_1_production_rate>
+		<substrate_1_production_rate type="double" units="1/min">0.00</substrate_1_production_rate>
 		<substrate_1_production_rate type="double" units="1/min">0.0</substrate_1_production_rate>
 		<substrate_1_production_rate type="double" units="1/min">0.0</substrate_1_production_rate>
 		<killer_production_rate>0.0</killer_production_rate>
@@ -541,12 +537,12 @@
 		<substrate_1_uptake_rate type="double" units="1/min">0.5</substrate_1_uptake_rate>
 		<substrate_2_uptake_rate type="double" units="1/min">0.5</substrate_2_uptake_rate>
 		<substrate_3_uptake_rate type="double" units="1/min">0.5</substrate_3_uptake_rate>
-		<killer_uptake_rate>0.2</killer_uptake_rate>
+		<killer_uptake_rate>0.5</killer_uptake_rate>
 
 		<substrate_1_turnover_rate type="double" units="1/min">1.0</substrate_1_turnover_rate>
 		<substrate_2_turnover_rate type="double" units="1/min">5.0</substrate_2_turnover_rate>
-		<substrate_3_turnover_rate type="double" units="1/min">10.0</substrate_3_turnover_rate>
-		<killer_turnover_rate>0.1</killer_turnover_rate>
+		<substrate_3_turnover_rate type="double" units="1/min">0.2</substrate_3_turnover_rate>
+		<killer_turnover_rate>5.0</killer_turnover_rate>
 		<!-- END ODE SOLVER INTRACELLULAR -->
 	</user_parameters>
 	

@@ -341,32 +341,34 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
-	pCell->custom_data["diff"] = parameters.doubles("diff_disable");
+	// pCell->custom_data["diff"] = parameters.doubles("diff_disable");
 
 	// If substrate_2 is higher than substrate_1
 	// ==> Differentiate in state 2
 	double sub_1_internal = pCell->phenotype.intracellular->get_parameter_value(".0");
-
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_1")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+	
+	// If the cell is not differentiated, determine a probability with which it will
+	if (fabs(pCell->custom_data["diff"] - parameters.doubles("diff_disable")) < 0.1) {
+		// The probability will depend on the substrate concentration
+		// The probability is 0 if there is no substrate
+		// and 1 if the substrate goes to infinity
+		if (UniformRandom() < (1 - 1/(1 + sub_1_internal))) {
+			// pCell->flag_for_division();
+			pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+			pCell->phenotype.cycle.data.transition_rates[0][0] *= 2.0;
+		}
 	}
-
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_2")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
-	}
-
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_3")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_3");
-	}
-
+	
+	
 	// Set the death rate according to the density of the killer substrate
-	/* int death_index = phenotype.death.find_death_model_index(100);
-	double killer_internal = pCell->phenotype.intracellular->get_parameter_value(".3");
-	phenotype.death.rates[death_index] = std::min((killer_internal - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);*/
+	int death_index = phenotype.death.find_death_model_index(100);
+	if (fabs(pCell->custom_data["diff"] - parameters.doubles("diff_enable_1")) < 0.1) {
+		// std::cout << phenotype.death.rates[death_index] << "\n";
+		double killer_internal = pCell->phenotype.intracellular->get_parameter_value(".3");
+		phenotype.death.rates[death_index] = std::max((killer_internal - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
+	} else {
+		phenotype.death.rates[death_index] = 0.0;
+	}
 	
 	return;
 }

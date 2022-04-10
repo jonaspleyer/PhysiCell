@@ -187,7 +187,7 @@ int main( int argc, char* argv[] )
 			// save data if it's time. 
 			if( fabs( PhysiCell_globals.current_time - PhysiCell_globals.next_full_save_time ) < 0.01 * diffusion_dt )
 			{
-				// display_simulation_status( std::cout ); 
+				display_simulation_status( std::cout ); 
 				if( PhysiCell_settings.enable_legacy_saves == true )
 				{	
 					log_output( PhysiCell_globals.current_time , PhysiCell_globals.full_output_index, microenvironment, report_file);

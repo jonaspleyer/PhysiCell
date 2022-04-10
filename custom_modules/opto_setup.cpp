@@ -39,25 +39,22 @@ void run_optogenetics ( const double& t ) {
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
 Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
-    int N_cells_diff_3 = std::count_if(
+    int N_cells_diff_1 = std::count_if(
         cells.begin(),
         cells.end(),
         [this](PhysiCell::Cell* cell) {
             // Check that cell is not dead
-            // If cell is of wrong type return 0
             if (cell->phenotype.death.dead) {
                 return false;
-            // Test if the cell would be 
             } else if (cell->type_name != "differentiation_cell") {
                 return false;
             } else {
                 double diff = cell->custom_data["diff"];
-                // We return the likelyhood that a cell can differentiate
-                return fabs(diff - diff_enable_3) < 0.1;
+                return fabs(diff - diff_enable_1) < 0.1;
             }
         }
         );
-    return N_cells_diff_3;
+    return N_cells_diff_1;
 }
 
 
@@ -69,11 +66,18 @@ void Diff_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // If discrepancy is positive, the ratio diff_1_cells to diff_2_cells is not large enough
     // Thus we need to increase production of substrate1
     // And reduce production of substrate2
-    if (cell_correct_type) {
+    if (cell_not_dead && cell_correct_type) {
+		// Secrete differentiating substrate
         double current_value_1 = cell->phenotype.intracellular->get_parameter_value(",00");
         // std::cout << current_value_1 << " " << current_value_2 << std::endl;
         double new_value_1 = std::max(current_value_1 + discrepancy, 0.0);
         cell->phenotype.intracellular->set_parameter_value(00, new_value_1);
+		
+		// Secrete killer substrate
+        double current_value_killer = cell->phenotype.intracellular->get_parameter_value(",30");
+        double new_value_killer = std::max(current_value_killer - discrepancy, 0.0);
+		// std::cout << current_value_killer << " " << new_value_killer << "\n";
+        cell->phenotype.intracellular->set_parameter_value(30, new_value_killer);
     }
     return;
 }
