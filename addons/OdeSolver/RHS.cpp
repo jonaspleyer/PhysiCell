@@ -131,7 +131,7 @@ void RHS::operator() ( const state_type& X , state_type& dX , const double t )
 	dX[4] = P(01) * X[0] - P(03) * X[4];
 	dX[5] = P(11) * X[1] - P(13) * X[5];
 	dX[6] = P(21) * X[2] - P(23) * X[6];
-	dX[6] = P(31) * X[2] - P(33) * X[7];
+	dX[7] = P(31) * X[3] - P(33) * X[7];
 
 	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
 	return;
