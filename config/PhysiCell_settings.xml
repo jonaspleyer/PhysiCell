@@ -491,7 +491,7 @@
 		<!-- GENERAL SETTINGS -->
 		<div_initialization type="divider" description="---Initialization settings---"/>
 		<random_seed type="int" units="dimensionless">0</random_seed>
-		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">200</number_of_cells>
+		<number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">500</number_of_cells>
 
 		<!-- OPTOGENETICS -->
 		<optogenetics_update_dt type="double" units="min">10</optogenetics_update_dt>
@@ -521,13 +521,13 @@
 
 		<Number_of_domains type="double">1</Number_of_domains>
 
-		<pid_controller_time_proportional type="double">0.1</pid_controller_time_proportional>
+		<pid_controller_time_proportional type="double">1.0</pid_controller_time_proportional>
 		<pid_controller_time_differential type="double">10</pid_controller_time_differential>
 		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
 
 		<target_diff_1_N_cells>0.0</target_diff_1_N_cells>
 		<target_diff_2_N_cells>0.0</target_diff_2_N_cells>
-		<target_diff_3_N_cells>70.0</target_diff_3_N_cells>
+		<target_diff_3_N_cells>175.0</target_diff_3_N_cells>
 		<target_killer_N_cells>0.0</target_killer_N_cells>
 		<!-- END OPTOGENETICS -->
 
