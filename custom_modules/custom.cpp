@@ -347,9 +347,9 @@ void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 	// ==> Differentiate in state 2
 	double sub_1_internal = pCell->phenotype.intracellular->get_parameter_value(".0");
 
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_1")) {
+	/* if (sub_1_internal > parameters.doubles("substrate_1_thresh_1")) {
 		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
-	}
+	}*/
 
 	// If substrate_1 is higher than substrate_2
 	// ==> Differentiate in state 1
