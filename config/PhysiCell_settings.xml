@@ -97,7 +97,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>3</omp_num_threads>
+		<omp_num_threads>24</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -393,7 +393,7 @@
 				</mechanics>
 				
 				<motility>  
-					<speed units="micron/min">0.0</speed>
+					<speed units="micron/min">0.4</speed>
 					<persistence_time units="min">1</persistence_time>
 					<migration_bias units="dimensionless">.5</migration_bias>
 					
@@ -480,7 +480,7 @@
 		<Number_of_domains type="double">1</Number_of_domains>
 
 		<pid_controller_time_proportional type="double">1.0</pid_controller_time_proportional>
-		<pid_controller_time_differential type="double">10</pid_controller_time_differential>
+		<pid_controller_time_differential type="double">1.0</pid_controller_time_differential>
 		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
 
 		<target_diff_1_N_cells>100.0</target_diff_1_N_cells>
