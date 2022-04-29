@@ -2,6 +2,7 @@
 #include <cmath>
 #include <random>
 #include <stdio.h>
+#include <fstream>
 
 double optogenetics_dt = 0.0;
 double optogenetics_next_run_time = 0.0;
@@ -39,7 +40,7 @@ void run_optogenetics ( const double& t ) {
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
 Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
-    int N_cells_diff_3 = std::count_if(
+    int N_cells_diff = std::count_if(
         cells.begin(),
         cells.end(),
         [this](PhysiCell::Cell* cell) {
@@ -53,11 +54,11 @@ Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<Ph
             } else {
                 double diff = cell->custom_data["diff"];
                 // We return the likelyhood that a cell can differentiate
-                return fabs(diff - diff_enable_3) < 0.1;
+                return fabs(diff - diff_enable) < 0.1;
             }
         }
         );
-    return N_cells_diff_3;
+    return N_cells_diff;
 }
 
 
@@ -70,10 +71,10 @@ void Diff_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Thus we need to increase production of substrate1
     // And reduce production of substrate2
     if (cell_correct_type) {
-        double current_value_1 = cell->phenotype.intracellular->get_parameter_value(",00");
+        double current_value_1 = cell->phenotype.intracellular->get_parameter_value("," + std::to_string(diff_index*10));
         // std::cout << current_value_1 << " " << current_value_2 << std::endl;
         double new_value_1 = std::max(current_value_1 + discrepancy, 0.0);
-        cell->phenotype.intracellular->set_parameter_value(00, new_value_1);
+        cell->phenotype.intracellular->set_parameter_value(diff_index*10, new_value_1);
     }
     return;
 }
@@ -104,10 +105,16 @@ double PID_Controllfunctor::adjust(std::deque<double> state) {
         );
         calculated += integral;
     }
-    auto fp = fopen("controller_logs.txt", "a");
     // fprintf(stderr, "Prop: %E Diff: %E Int: %E Calc: %E sSize: %2d LastState: %2E\n", prop, differential, integral, calculated, state.size(), state.back());
-    fprintf(fp, "%2d, %E, %E, %E, %E, %E\n", state.size(), prop, differential, integral, calculated, state.back());
-    fclose(fp);
+    if (diff_index == 0) {
+        auto fp = fopen("controller_logs_1.txt", "a");
+        fprintf(fp, "%2d, %E, %E, %E, %E, %E\n", state.size(), prop, differential, integral, calculated, state.back());
+        fclose(fp);
+    } else if (diff_index == 1) {
+        auto fp = fopen("controller_logs_2.txt", "a");
+        fprintf(fp, "%2d, %E, %E, %E, %E, %E\n", state.size(), prop, differential, integral, calculated, state.back());
+        fclose(fp);
+    }
     return calculated;
 }
 
@@ -155,23 +162,42 @@ void setup_optogenetics( void ) {
         diff_domains.push_back(_doms);
     };
 
-    Val target = PhysiCell::parameters.doubles("target_diff_3_N_cells");
+    Val target_1 = PhysiCell::parameters.doubles("target_diff_1_N_cells");
+    Val target_2 = PhysiCell::parameters.doubles("target_diff_2_N_cells");
     int i = 0;
     for (auto const& [_observable_domain, _effect_domain] : diff_domains) {
+        double diff_enable_1 = PhysiCell::parameters.doubles("diff_enable_1");
+        double diff_enable_2 = PhysiCell::parameters.doubles("diff_enable_2");
         auto cont1 = new Diff_Controller(
             // Observable and Effect Domain
             // Kernel::Iso_cuboid_3(Kernel::Point_3(-150.0, -150.0, -10.0), Kernel::Point_3(150.0, 150.0, 10.0)),
             _observable_domain,
             _effect_domain,
             // Target: How many differentiated cells do we want to have?
-            target
+            target_1,
+            diff_enable_1,
+		    0
         );
-        supervisor.add_controller("Diff_Controller_diff_" + std::to_string(i), cont1);
+        auto cont2 = new Diff_Controller(
+            // Observable and Effect Domain
+            // Kernel::Iso_cuboid_3(Kernel::Point_3(-150.0, -150.0, -10.0), Kernel::Point_3(150.0, 150.0, 10.0)),
+            _observable_domain,
+            _effect_domain,
+            // Target: How many differentiated cells do we want to have?
+            target_2,
+            diff_enable_2,
+		    1
+        );
+        supervisor.add_controller("Diff_Controller_diff_1_" + std::to_string(i), cont1);
+        supervisor.add_controller("Diff_Controller_diff_2_" + std::to_string(i), cont2);
         i++;
     }
 
-    auto fp = fopen("controller_logs.txt", "w");
+    auto fp = fopen("controller_logs_1.txt", "w");
     // fprintf(stderr, "Prop: %E Diff: %E Int: %E Calc: %E sSize: %2d LastState: %2E\n", prop, differential, integral, calculated, state.size(), state.back());
+    fprintf(fp, "StateSize, Proportional, Differential, Integral, Total, LastState\n");
+    fclose(fp);
+    fp = fopen("controller_logs_2.txt", "w");
     fprintf(fp, "StateSize, Proportional, Differential, Integral, Total, LastState\n");
     fclose(fp);
 

@@ -44,9 +44,8 @@ class PID_Controllfunctor : public Opto::Controller::ControllFunctor {
 class Diff_ObservableCuboid : public Opto::Controller::Observable<Val, Kernel::Iso_cuboid_3> {
 	public:
 		double diff_disable = PhysiCell::parameters.doubles("diff_disable");
-		double diff_enable_1 = PhysiCell::parameters.doubles("diff_enable_1");
-		double diff_enable_2 = PhysiCell::parameters.doubles("diff_enable_2");
-		double diff_enable_3 = PhysiCell::parameters.doubles("diff_enable_3");
+		double diff_enable = 0.0;
+		int diff_index = 0;
 		Kernel::Iso_cuboid_3 domain;
 		Val measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) override;
 };
@@ -61,8 +60,8 @@ class Diff_Metric : public Opto::Controller::Metric<Val> {
 class Diff_Effect : public Opto::Controller::Effect<Kernel::Iso_cuboid_3> {
     public:
 		double diff_disable = PhysiCell::parameters.doubles("diff_disable");
-		double diff_enable_1 = PhysiCell::parameters.doubles("diff_enable_1");
-		double diff_enable_2 = PhysiCell::parameters.doubles("diff_enable_2");
+		double diff_enable = 0.0;
+		int diff_index = 0;
 		std::unique_ptr<Opto::Light::LightSource> lightsource = std::make_unique<Red_LED>();
         void apply(PhysiCell::Cell* cell, const double discrepancy);
 };
@@ -73,11 +72,18 @@ public:
 	Diff_Controller(
 		Kernel::Iso_cuboid_3 _observable_cuboid,
 		Kernel::Iso_cuboid_3 _effect_cuboid,
-		Val _target
+		Val _target,
+		double diff_enable,
+		int diff_index
 	) {
 		observable->observable_domain = _observable_cuboid;
 		effect->effect_domain = _effect_cuboid;
 		target = _target;
+		effect->diff_enable = diff_enable;
+		effect->diff_index = diff_index;
+		observable->diff_enable = diff_enable;
+		observable->diff_index = diff_index;
+		controllfunctor->diff_index = diff_index;
 	}
 
 	int state_max_size = 20000;
