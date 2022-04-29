@@ -38,6 +38,10 @@ class PID_Controllfunctor : public Opto::Controller::ControllFunctor {
 		// Time constant between update steps
 		double update_dt = PhysiCell::parameters.doubles("optogenetics_update_dt");
 		double adjust(std::deque<double> state);
+		std::deque<std::array<double, 3>> calculated_responses;
+		int calculated_responses_size = 200;
+		double low_pass_cutoff = 0.02/PhysiCell::parameters.doubles("optogenetics_update_dt");
+		int diff_index = -1;
 };
 
 

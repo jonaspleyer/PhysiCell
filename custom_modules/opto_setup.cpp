@@ -95,6 +95,9 @@ double PID_Controllfunctor::adjust(std::deque<double> state) {
     
     if (state.size()>1) {
         differential = K_d*(state.back()-state.end()[-2])/update_dt;
+        // Implement "leaky integrator" which is almost a low pass filter
+        differential = (1-low_pass_cutoff) * (calculated_responses.back()[1]) + differential * low_pass_cutoff;
+        // Add to completed result
         calculated += differential;
     }
     if (state.size()>10) {
@@ -115,6 +118,11 @@ double PID_Controllfunctor::adjust(std::deque<double> state) {
         fprintf(fp, "%2d, %E, %E, %E, %E, %E\n", state.size(), prop, differential, integral, calculated, state.back());
         fclose(fp);
     }
+    if (calculated_responses.size() >= calculated_responses_size) {
+        calculated_responses.erase(calculated_responses.begin());
+    }
+    std::array<double, 3> res = {prop, differential, integral};
+    calculated_responses.push_back(res);
     return calculated;
 }
 
