@@ -159,14 +159,6 @@ void define_cell_parameters( void )
 	cell_defaults.phenotype.intracellular->set_parameter_value(10, parameters.doubles("substrate_2_production_rate"));
 	cell_defaults.phenotype.intracellular->set_parameter_value(11, 0.0);
 	cell_defaults.phenotype.intracellular->set_parameter_value(13, 0.0);
-	// substrate_3
-	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("substrate_3_production_rate"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(23, 0.0);
-	// killer substrate
-	cell_defaults.phenotype.intracellular->set_parameter_value(20, parameters.doubles("killer_production_rate"));
-	cell_defaults.phenotype.intracellular->set_parameter_value(21, 0.0);
-	cell_defaults.phenotype.intracellular->set_parameter_value(23, 0.0);
 
 	// Cells that differentiate
 	Cell_Definition* differentiation_cell = cell_definitions_by_name["differentiation_cell"];
@@ -178,15 +170,6 @@ void define_cell_parameters( void )
 	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0); // production_rate
 	differentiation_cell->phenotype.intracellular->set_parameter_value(11, parameters.doubles("substrate_2_uptake_rate"));
 	differentiation_cell->phenotype.intracellular->set_parameter_value(13, parameters.doubles("substrate_2_turnover_rate"));
-	// substrate_3
-	differentiation_cell->phenotype.intracellular->set_parameter_value(10, 0.0); // production_rate
-	differentiation_cell->phenotype.intracellular->set_parameter_value(11, parameters.doubles("substrate_3_uptake_rate"));
-	differentiation_cell->phenotype.intracellular->set_parameter_value(13, parameters.doubles("substrate_3_turnover_rate"));
-	// killer substrate
-	differentiation_cell->phenotype.intracellular->set_parameter_value(30, 0.0); // production_rate
-	differentiation_cell->phenotype.intracellular->set_parameter_value(31, parameters.doubles("killer_uptake_rate"));
-	differentiation_cell->phenotype.intracellular->set_parameter_value(33, parameters.doubles("killer_turnover_rate"));
-
 	
 
 	// Differentiate with respect to density of substrates
@@ -313,19 +296,7 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 			output[0] = interior_color_diff_2;
 			output[2] = interior_color_diff_2;
 		}
-		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
-		{
-			output[0] = interior_color_diff_3;
-			output[2] = interior_color_diff_3;
-		}
 	}
-	/* double low = 0.0;
-	double high = 0.4;
-	if (pCell->type_name == "differentiation_cell") {
-		double value = (fmax(low, fmin(high, pCell->phenotype.intracellular->get_parameter_value(".0")))-low)/(high-low);
-		const tinycolormap::Color color = 255.0*tinycolormap::GetColor(value, tinycolormap::ColormapType::Viridis);
-		output[2] = "rgb(" + std::to_string(color.r()) + "," + std::to_string(color.g()) + "," + std::to_string(color.b()) + ")";
-	}*/
 
 	return output;
 
@@ -339,35 +310,45 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 }
 
 
+double response_function(const double& concentration, const double& offset, const double& attack) {
+	return 1 + erf(attack*concentration - offset);
+}
+
+
 void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	pCell->custom_data["diff"] = parameters.doubles("diff_disable");
-
-	// If substrate_2 is higher than substrate_1
-	// ==> Differentiate in state 2
-	double sub_1_internal = pCell->phenotype.intracellular->get_parameter_value(".0");
-
-	/* if (sub_1_internal > parameters.doubles("substrate_1_thresh_1")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+	/* if (fabs(pCell->custom_data["diff"] - parameters.doubles("diff_disable")) > 0.1) {
+		return;
 	}*/
+	int N_substrates = 2;
+	double prob[N_substrates];
 
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_2")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
+	for (int i=0; i<2; i++) {
+		double sub_internal = pCell->phenotype.intracellular->get_parameter_value("." + std::to_string(i));
+		double sub_offset = parameters.doubles("substrate_" + std::to_string(i+1) + "_offset");
+		double sub_attack = parameters.doubles("substrate_" + std::to_string(i+1) + "_attack");
+		prob[i] = response_function(sub_internal, sub_offset, sub_attack);
 	}
 
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (sub_1_internal > parameters.doubles("substrate_1_thresh_3")) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_3");
+	double rand = UniformRandom();
+	double sum = std::accumulate(prob, prob+N_substrates, sum);
+	// If this is successfull, do nothing
+	if (rand >= sum/N_substrates) {
+		return;
+	// Otherwise set diff variable correspondingly
+	}
+	double part = 0.0;
+	for (int i=0; i<N_substrates; i++) {
+		// std::cout << i << " Low: " << part << " High: " << part + prob[i]/N_substrates << " Value: " << prob[i] << " Random: " << rand << " Internal: " << pCell->phenotype.intracellular->get_parameter_value("." + std::to_string(i)) << "\n";
+		if (part < rand && rand <= part + prob[i]/N_substrates) {
+			// std::cout << "Enable diff_" + std::to_string(i) << "\n";
+			pCell->custom_data["diff"] = parameters.doubles("diff_enable_" + std::to_string(i+1));
+			return;
+		}
+		part += prob[i]/N_substrates;
 	}
 
-	// Set the death rate according to the density of the killer substrate
-	/* int death_index = phenotype.death.find_death_model_index(100);
-	double killer_internal = pCell->phenotype.intracellular->get_parameter_value(".3");
-	phenotype.death.rates[death_index] = std::min((killer_internal - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);*/
-	
 	return;
 }
 
