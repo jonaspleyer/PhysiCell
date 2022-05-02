@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">7200</max_time> <!-- 5 days * 24 h * 60 min -->
+		<max_time units="min">10000</max_time> <!-- 5 days * 24 h * 60 min -->
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
@@ -134,7 +134,7 @@
 
 		<variable name="substrate2" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">75.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">150.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -480,8 +480,8 @@
 		<Number_of_domains type="double">1</Number_of_domains>
 
 		<pid_controller_time_proportional type="double">1.0</pid_controller_time_proportional>
-		<pid_controller_time_differential type="double">1.0</pid_controller_time_differential>
-		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
+		<pid_controller_time_differential type="double">10.0</pid_controller_time_differential>
+		<pid_controller_time_integral type="double">2000.0</pid_controller_time_integral>
 
 		<target_diff_1_N_cells>100.0</target_diff_1_N_cells>
 		<target_diff_2_N_cells>150.0</target_diff_2_N_cells>
