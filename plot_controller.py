@@ -7,7 +7,7 @@ def get_acceptable_data(values, buffer=5, sigma=0.0001):
     acc = []
     for i, val in enumerate(values):
         subrange = values[max(0,i-buffer): min(len(values), i+buffer)]
-        acc.append(abs(np.median(subrange)-val) < np.std(subrange) / sigma)
+        acc.append(abs(np.median(subrange)-val) <= np.std(subrange) / sigma)
     return acc
 
 if __name__ == "__main__":
