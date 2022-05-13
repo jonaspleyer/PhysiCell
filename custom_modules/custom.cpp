@@ -311,27 +311,31 @@ void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 
 double response_function(const double& concentration, const double& offset, const double& attack) {
-	return 1 + erf(attack*concentration - offset);
+	return 0.5 + 0.5 * erf(attack*(concentration - offset));
 }
 
 
 void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 {
-	pCell->custom_data["diff"] = parameters.doubles("diff_disable");
+	if (UniformRandom() < 0.1) {
+		pCell->custom_data["diff"] = parameters.doubles("diff_disable");
+	}
 	/* if (fabs(pCell->custom_data["diff"] - parameters.doubles("diff_disable")) > 0.1) {
 		return;
 	}*/
 	int N_substrates = 2;
 	double prob[N_substrates];
+	double subs_internal[N_substrates];
 
 	for (int i=0; i<2; i++) {
 		double sub_internal = pCell->phenotype.intracellular->get_parameter_value("." + std::to_string(i));
+		subs_internal[i] = pCell->phenotype.intracellular->get_parameter_value("." + std::to_string(i));
 		double sub_offset = parameters.doubles("substrate_" + std::to_string(i+1) + "_offset");
 		double sub_attack = parameters.doubles("substrate_" + std::to_string(i+1) + "_attack");
 		prob[i] = response_function(sub_internal, sub_offset, sub_attack);
 	}
 
-	double rand = UniformRandom();
+	/* double rand = UniformRandom();
 	double sum = std::accumulate(prob, prob+N_substrates, sum);
 	// If this is successfull, do nothing
 	if (rand >= sum/N_substrates) {
@@ -347,6 +351,15 @@ void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 			return;
 		}
 		part += prob[i]/N_substrates;
+	}*/
+	if (subs_internal[1] > subs_internal[0] && subs_internal[1] > parameters.doubles("substrate_2_offset")) {
+		if (UniformRandom() < prob[1]) {
+			pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
+		}
+	} else {
+		if (UniformRandom() < prob[0] && subs_internal[0] > parameters.doubles("substrate_1_offset")) {
+			pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
+		}
 	}
 
 	return;

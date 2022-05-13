@@ -93,7 +93,7 @@
 	
 		<dt_diffusion units="min">0.01</dt_diffusion>
 		<dt_mechanics units="min">0.1</dt_mechanics>
-		<dt_phenotype units="min">6</dt_phenotype>	
+		<dt_phenotype units="min">10</dt_phenotype>
 	</overall>
 	
 	<parallel>
@@ -126,7 +126,7 @@
 	<microenvironment_setup>
 		<variable name="substrate1" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">75.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">50.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -134,7 +134,7 @@
 
 		<variable name="substrate2" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">150.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">500.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -471,15 +471,15 @@
 		<diff_enable_1 type="double">1.0</diff_enable_1>
 		<diff_enable_2 type="double">2.0</diff_enable_2>
 
-		<substrate_1_offset type="double">10.0</substrate_1_offset>
-		<substrate_2_offset type="double">10.0</substrate_2_offset>
+		<substrate_1_offset type="double">5000.0</substrate_1_offset>
+		<substrate_2_offset type="double">5000.0</substrate_2_offset>
 
-		<substrate_1_attack type="double">0.1</substrate_1_attack>
-		<substrate_2_attack type="double">0.1</substrate_2_attack>
+		<substrate_1_attack type="double">0.000125</substrate_1_attack>
+		<substrate_2_attack type="double">0.000125</substrate_2_attack>
 
 		<Number_of_domains type="double">1</Number_of_domains>
 
-		<pid_controller_time_proportional type="double">1.0</pid_controller_time_proportional>
+		<pid_controller_time_proportional type="double">5.0</pid_controller_time_proportional>
 		<pid_controller_time_differential type="double">10.0</pid_controller_time_differential>
 		<pid_controller_time_integral type="double">2000.0</pid_controller_time_integral>
 
