@@ -107,7 +107,7 @@ void chemotaxis_bias_function( Cell* pCell, Phenotype& phenotype , double dt )
 
 
 void change_production_parameter(const double time) {
-	for (int k=0; k<5; k++) {
+	/* for (int k=0; k<5; k++) {
 		if ( fabs(time - parameters.doubles("opto_step_" + std::to_string(k))) < diffusion_dt) {
 			double val = parameters.doubles("opto_production_val_" + std::to_string(k));
 			for (int i=0; i<(*all_cells).size(); i++) {
@@ -115,7 +115,7 @@ void change_production_parameter(const double time) {
 			}
 			std::cout << "Changing opto production of step" << k << " value to " << val << std::endl;
 		}
-	}
+	}*/
 }
 
 void create_cell_types( void )
@@ -281,7 +281,7 @@ void setup_tissue( void )
 	for ( int n = 1; n<= N_free_cells; n++ ) {
 		std::vector<double> position = {0,0,0};
 		position[0] = Xmin + X_offset + UniformRandom()*Xrange_reduced;
-		position[1] = Ymin + Yrange_reduced + UniformRandom()*(Yrange-Yrange_reduced);
+		position[1] = Ymin + Y_offset + UniformRandom()*Yrange;//Yrange_reduced + UniformRandom()*(Yrange-Yrange_reduced);
 
 		pC = create_cell( *pCD );
 		pC->assign_position( position );
