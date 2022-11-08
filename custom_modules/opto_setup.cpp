@@ -2,6 +2,8 @@
 #include <cmath>
 #include <random>
 #include <chrono>
+#include <fstream>
+#include <iostream>
 
 double optogenetics_dt = 0.0;
 double optogenetics_next_run_time = 0.0;
@@ -101,7 +103,13 @@ Val Diff_2_ObservableSphere::measure(Kernel::Sphere_3& _domain, std::vector<Phys
             return cell_not_dead && cell_correct_type;
         }
         );
-    // std::cout << "matching cells in domain: " << N_cells << std::endl;
+    std::cout << "matching cells in domain: " << N_cells << std::endl;
+    
+    // Write this to a file for plots later
+    std::ofstream outfile;
+    outfile.open("information.csv", std::ios_base::app);
+    outfile << N_cells << "," << PhysiCell::parameters.doubles("cell_target_sphere") << "\n";
+
     return N_cells;
 }
 
@@ -128,10 +136,10 @@ double Diff_Metric::calculate(Val& target, Val& observed) {
 }
 
 
-double PI_Controllfunctor::adjust(std::deque<double> state) {
+double PD_Controllfunctor::adjust(std::deque<double> state) {
     // Target is implicitly always 0.0
     // This implements a PI Controller
-    double calculated = K_p*state.back() + K_i*(state.back()-state[state.size()-1])/update_dt;
+    double calculated = K_p*state.back() + K_d*(state.back()-state[state.size()-1])/update_dt;
     return calculated;
 }
 
@@ -245,20 +253,21 @@ void setup_optogenetics( void ) {
     std::cout << "          Setting up OptoGen          " << std::endl;
     std::cout << "**************************************\n" << std::endl;
 
-    // Control how the shape of the rectangle without center is
-    // x_thickness, x_center
-    double xt = PhysiCell::parameters.doubles("x_thickness");
-    double xc = PhysiCell::parameters.doubles("x_center");
-    // y_thickness, y_center
-    double yt = PhysiCell::parameters.doubles("y_thickness");
-    double yc = PhysiCell::parameters.doubles("y_center");
-    // z_thickness, z_center
-    double zt = PhysiCell::parameters.doubles("z_thickness");
-    double zc = PhysiCell::parameters.doubles("z_center");
-    // Total size modifier
-    double sm = PhysiCell::parameters.doubles("size_modifier");
+    auto sphere_outer = Kernel::Sphere_3(
+        Kernel::Point_3(0, 0, 0),
+        pow(PhysiCell::parameters.doubles("diff_3_circle_radius"), 2.0));
 
-    std::vector<Kernel::Iso_cuboid_3> diff_1_domains = {
+    auto cont = new Diff_2_Controller(
+        sphere_outer,
+        PhysiCell::parameters.doubles("cell_target_sphere")
+    );
+    supervisor.add_controller("Diff_2_Controller", cont);
+
+    std::ofstream outfile;
+    outfile.open("information.csv");
+    outfile << "N_cells,setpoint\n";
+
+    /*std::vector<Kernel::Iso_cuboid_3> diff_1_domains = {
         // Left hand side
         Kernel::Iso_cuboid_3(Kernel::Point_3(xc-sm*xt*3/2, yc-sm*yt*3/2, zc-sm*zt/2), Kernel::Point_3( xc-sm*xt*1/2, yc-sm*yt*1/2, zc+sm*zt/2)),
         Kernel::Iso_cuboid_3(Kernel::Point_3(xc-sm*xt*3/2, yc-sm*yt*1/2, zc-sm*zt/2), Kernel::Point_3( xc-sm*xt*1/2, yc+sm*yt*1/2, zc+sm*zt/2)),
@@ -298,10 +307,10 @@ void setup_optogenetics( void ) {
         );
         supervisor.add_controller("Diff_Controller_diff_1_" + std::to_string(i), cont);
         i++;
-    }
+    }*/
 
     // Same for diff_2 domains
-    i=0;
+    /*i=0;
     for (auto const& _domain : diff_2_domains) {
         auto cont = new Diff_2_Controller(
             _domain,
@@ -309,10 +318,10 @@ void setup_optogenetics( void ) {
         );
         supervisor.add_controller("Diff_Controller_diff_2_" + std::to_string(i), cont);
         i++;
-    }
+    }*/
 
     // Same for diff_3 domains
-    i=0;
+    /*i=0;
     for (auto const& _domain : diff_3_domains) {
         auto cont = new Diff_3_Controller(
             _domain,
@@ -320,7 +329,7 @@ void setup_optogenetics( void ) {
         );
         supervisor.add_controller("Diff_Controller_diff_3_" + std::to_string(i), cont);
         i++;
-    }
+    }*/
 
     // TODO CURRENTLY NOT WORKING
     // Add visitor to save state to csv file

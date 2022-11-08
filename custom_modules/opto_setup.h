@@ -68,12 +68,12 @@ public:
 
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES
-class PI_Controllfunctor : public Opto::Controller::ControllFunctor {
+class PD_Controllfunctor : public Opto::Controller::ControllFunctor {
 	public:
 		// Proportional multiplication constant
-		double K_p = 0.1;
+		double K_p = 10.0;
 		// Differential multiplication constant
-		double K_i = 0.1;
+		double K_d = 0.1;
 		// Time constant between update steps
 		double update_dt = PhysiCell::parameters.doubles("optogenetics_update_dt");
 		double adjust(std::deque<double> state);
@@ -162,7 +162,7 @@ public:
 	std::unique_ptr<Diff_1_ObservableCuboid> observable = std::make_unique<Diff_1_ObservableCuboid>();
     Val target{};
     std::unique_ptr<Diff_Metric> metric = std::make_unique<Diff_Metric>();
-    std::unique_ptr<PI_Controllfunctor> controllfunctor = std::make_unique<PI_Controllfunctor>();
+    std::unique_ptr<PD_Controllfunctor> controllfunctor = std::make_unique<PD_Controllfunctor>();
     std::unique_ptr<Diff_1_Effect> effect = std::make_unique<Diff_1_Effect>();
 };
 
@@ -182,7 +182,7 @@ public:
 	std::unique_ptr<Diff_2_ObservableSphere> observable = std::make_unique<Diff_2_ObservableSphere>();
     Val target{};
     std::unique_ptr<Diff_Metric> metric = std::make_unique<Diff_Metric>();
-    std::unique_ptr<PI_Controllfunctor> controllfunctor = std::make_unique<PI_Controllfunctor>();
+    std::unique_ptr<PD_Controllfunctor> controllfunctor = std::make_unique<PD_Controllfunctor>();
     std::unique_ptr<Diff_2_Effect> effect = std::make_unique<Diff_2_Effect>();
 };
 
@@ -202,7 +202,7 @@ public:
 	std::unique_ptr<Diff_3_ObservableSphere> observable = std::make_unique<Diff_3_ObservableSphere>();
     Val target{};
     std::unique_ptr<Diff_Metric> metric = std::make_unique<Diff_Metric>();
-    std::unique_ptr<PI_Controllfunctor> controllfunctor = std::make_unique<PI_Controllfunctor>();
+    std::unique_ptr<PD_Controllfunctor> controllfunctor = std::make_unique<PD_Controllfunctor>();
     std::unique_ptr<Diff_3_Effect> effect = std::make_unique<Diff_3_Effect>();
 };
 
