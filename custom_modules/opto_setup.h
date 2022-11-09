@@ -71,9 +71,9 @@ public:
 class PD_Controllfunctor : public Opto::Controller::ControllFunctor {
 	public:
 		// Proportional multiplication constant
-		double K_p = 10.0;
+		double K_p = 0.001;
 		// Differential multiplication constant
-		double K_d = 0.1;
+		double K_d = 0.001;
 		// Time constant between update steps
 		double update_dt = PhysiCell::parameters.doubles("optogenetics_update_dt");
 		double adjust(std::deque<double> state);
