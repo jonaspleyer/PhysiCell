@@ -1,6 +1,6 @@
 PROJECT_NAME="./project"
 BASE_DIR=$(pwd)
-THREADS=16
+THREADS=44
 
 # Clean old files and logs
 rm $PROJECT_NAME
