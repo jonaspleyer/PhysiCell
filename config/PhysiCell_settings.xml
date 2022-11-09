@@ -164,7 +164,7 @@
 					<!-- use phase_transition_rates OR phase_durations -->
 
 					<phase_transition_rates units="1/min"> 
-						<rate start_index="0" end_index="1" fixed_duration="false">1e-04</rate>
+						<rate start_index="0" end_index="1" fixed_duration="false">1e-03</rate>
 						<rate start_index="1" end_index="2" fixed_duration="true">0.0</rate>
 						<rate start_index="2" end_index="3" fixed_duration="true">0.0</rate>
 						<rate start_index="3" end_index="0" fixed_duration="true">0.0</rate>
@@ -328,20 +328,12 @@
 		<diff_2_circle_radius type="double" units="None">600.0</diff_2_circle_radius>
 		<diff_3_circle_radius type="double" units="None">700.0</diff_3_circle_radius>
 
+		<density_circle_radius type="double" units="None">800.0</density_circle_radius>
+
 		<!-- USED FOR OPTOGENETIC DIFFERENTIATION CONTROLLER -->
-		<diff_start type="double">-1.0</diff_start>
-		<diff_disable type="double">-1.0</diff_disable>
-
-		<diff_enable_1 type="double">1.0</diff_enable_1>
-		<diff_enable_2 type="double">2.0</diff_enable_2>
-		<diff_enable_3 type="double">3.0</diff_enable_3>
-
-		<diff_1_migration_speed type="double">0.2</diff_1_migration_speed>
-		<diff_1_adhesion_strength type="double">1.5</diff_1_adhesion_strength>
- 
-		<diff_2_volume_multiplier type="double">2.5</diff_2_volume_multiplier>
-
-		<diff_3_speed type="double" units="micron/min">3.0</diff_3_speed>	
+		<controller_k_p type="double" units="None">0.1</controller_k_p>
+		<controller_k_d type="double" units="None">0.0</controller_k_d>
+		<controller_k_i type="double" units="None">0.0</controller_k_i>
 
 		<cell_target_sphere type="double">400</cell_target_sphere>
 		<!-- END OPTOGENETICS -->

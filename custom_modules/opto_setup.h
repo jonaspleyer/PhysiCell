@@ -23,7 +23,7 @@ struct Red_LED : public Opto::Light::LightSource {
 
 // *********************************************************************************
 // DENSITY CONTROLLER MODULES
-/* class DensityControllFunctor : public Opto::Controller::ControllFunctor {
+class DensityControllFunctor : public Opto::Controller::ControllFunctor {
 	public:
 		double adjust(std::deque<double> state);
 };
@@ -41,30 +41,32 @@ class DensityMetric : public Opto::Controller::Metric<Val> {
 };
 
 
-class DensityEffect : public Opto::Controller::Effect {
+class DensityEffect : public Opto::Controller::Effect<Kernel::Sphere_3> {
     public:
 		std::unique_ptr<Opto::Light::LightSource> lightsource = std::make_unique<Red_LED>();
         void apply(PhysiCell::Cell* cell, const double discrepancy);
 };
 
 
-class DensityController : public Opto::Controller::Controller<Kernel::Sphere_3, Val, DensityController> {
+class DensityController : public Opto::Controller::Controller<Val, DensityController, Kernel::Sphere_3, Kernel::Sphere_3> {
 public:
 	DensityController(
-		Kernel::Sphere_3 _domain,
+		Kernel::Sphere_3 _sphere,
 		Val _target
 	) {
-		domain = _domain;
+		observable->observable_domain = _sphere;
+		effect->effect_domain = _sphere;
 		target = _target;
 	}
-    Kernel::Sphere_3 domain{};
-    std::unique_ptr<DensityObservableSphere> observable = std::make_unique<DensityObservableSphere>();
+
+	Kernel::Sphere_3 domain;
+	std::unique_ptr<DensityObservableSphere> observable = std::make_unique<DensityObservableSphere>();
     Val target{};
     std::unique_ptr<DensityMetric> metric = std::make_unique<DensityMetric>();
     std::unique_ptr<DensityControllFunctor> controllfunctor = std::make_unique<DensityControllFunctor>();
     std::unique_ptr<DensityEffect> effect = std::make_unique<DensityEffect>();
 };
-*/
+
 
 // *********************************************************************************
 // DIFFERENTIATION CONTROLLER MODULES

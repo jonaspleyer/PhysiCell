@@ -39,10 +39,15 @@ void run_optogenetics ( const double& t ) {
 
 // *********************************************************************************
 // DENSITY CONTROLLER MODULES
-/* Val DensityObservableSphere::measure(Kernel::Sphere_3& _domain, std::vector<PhysiCell::Cell*> cells) {
+Val DensityObservableSphere::measure(Kernel::Sphere_3& _domain, std::vector<PhysiCell::Cell*> cells) {
     int N_cells = std::count_if(cells.begin(), cells.end(), [](PhysiCell::Cell* cell){return !cell->phenotype.death.dead;});
     std::cout << "Cells living in domain: " << N_cells << std::endl;
     // double domain_size = 4.0*M_PI*std::pow(_domain.squared_radius(),3/2)/3.0;
+    // Write this to a file for plots later
+    std::ofstream outfile;
+    outfile.open("information.csv", std::ios_base::app);
+    outfile << N_cells << "," << cells.size() << "," << PhysiCell::parameters.doubles("cell_target_sphere") << "\n";
+
     return N_cells;
 }
 
@@ -69,7 +74,7 @@ void DensityEffect::apply(PhysiCell::Cell* cell, const double discrepancy) {
         cell->start_death(cell->phenotype.death.find_death_model_index(100));
     }
     return;
-}*/
+}
 
 
 // *********************************************************************************
@@ -104,11 +109,6 @@ Val Diff_2_ObservableSphere::measure(Kernel::Sphere_3& _domain, std::vector<Phys
         }
         );
     std::cout << "matching cells in domain: " << N_cells << std::endl;
-    
-    // Write this to a file for plots later
-    std::ofstream outfile;
-    outfile.open("information.csv", std::ios_base::app);
-    outfile << N_cells << "," << PhysiCell::parameters.doubles("cell_target_sphere") << "\n";
 
     return N_cells;
 }
@@ -253,19 +253,20 @@ void setup_optogenetics( void ) {
     std::cout << "          Setting up OptoGen          " << std::endl;
     std::cout << "**************************************\n" << std::endl;
 
+    std::cout << PhysiCell::parameters.doubles("density_circle_radius") << "\n";
     auto sphere_outer = Kernel::Sphere_3(
         Kernel::Point_3(0, 0, 0),
-        pow(PhysiCell::parameters.doubles("diff_3_circle_radius"), 2.0));
+        pow(PhysiCell::parameters.doubles("density_circle_radius"), 2.0));
 
-    auto cont = new Diff_2_Controller(
+    auto cont = new DensityController(
         sphere_outer,
         PhysiCell::parameters.doubles("cell_target_sphere")
     );
-    supervisor.add_controller("Diff_2_Controller", cont);
+    supervisor.add_controller("Density_controller", cont);
 
     std::ofstream outfile;
     outfile.open("information.csv");
-    outfile << "N_cells,setpoint\n";
+    outfile << "N_cells,total cells,setpoint\n";
 
     /*std::vector<Kernel::Iso_cuboid_3> diff_1_domains = {
         // Left hand side
