@@ -192,12 +192,10 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 	std::vector<std::string> output = { "black", "black", "black", "black" }; 
 	
 	// paint by number -- by cell type 
-	std::string interior_color = "grey"; 
-	std::string interior_color_diff_1 = "red";
-	std::string interior_color_diff_2 = "blue";
-	std::string interior_color_diff_3 = "yellow";
+	std::string interior_color = "rgb(34,139,34)"; 
+	// the final red color should be rgb(220,20,60) before it turns black when dying
 	
-	output[0] = interior_color; // set cytoplasm color 
+	output[0] = interior_color; // set cytoplasm color
 	
 	if( pCell->phenotype.death.dead == false ) // if live, color nucleus same color 
 	{
@@ -213,31 +211,78 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		output[2] = "rgb(139,69,19)";
 		output[3] = "rgb(139,69,19)";
 	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
-	{
-		output[0] = interior_color_diff_1;
-		output[2] = interior_color_diff_1;
-	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_2")) < 0.1)
-	{
-		output[0] = interior_color_diff_2;
-		output[2] = interior_color_diff_2;
-	}
-	if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
-	{
-		output[0] = interior_color_diff_3;
-		output[2] = interior_color_diff_3;
+
+	// Color the inside of the cell with the current concentration of ions inside it.
+	double thresh_start = PhysiCell::parameters.doubles("light_ion_thresh_death_start");
+	double thresh_end = PhysiCell::parameters.doubles("light_ion_thresh_death_end");
+	double conc = pCell->custom_data["light_ion_concentration"];
+
+	// Creates a values between 0 and 1
+	if (conc <= thresh_start) {
+		double value = std::max(std::min(thresh_start, conc), 0.0) / thresh_start;
+
+		// If value is at thresh, we want to have no more green 
+		double r_value = (1 - value) *  34.0 + value * 220.0;
+		double g_value = (1 - value) * 139.0 + value *  20.0;
+		double b_value = (1 - value) *  34.0 + value *  60.0;
+
+		output[2] = "rgb(" + std::to_string(r_value) + "," + std::to_string(g_value) +"," + std::to_string(b_value) + ")";
+	} else if (conc > thresh_start && conc < thresh_end) {
+		double value = std::max(std::min(thresh_end, conc), 0.0) / thresh_end;
+
+		double r_value = (1 - value) * 220.0;
+		double g_value = (1 - value) *  20.0;
+		double b_value = (1 - value) *  60.0;
+
+		output[2] = "rgb(" + std::to_string(r_value) + "," + std::to_string(g_value) +"," + std::to_string(b_value) + ")";
+	} else {
+		output[2] = "rgb(0,0,0)";
 	}
 
 	return output;
-
 }
 
 void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
-{ return; }
+{
+	// Increase chance of death with more neighbors
+	// Count the number of cells in the current voxel
+	// int index = pCell->get_current_voxel_index();
+	// int n_cells = std::count_if(PhysiCell::all_cells->begin(), PhysiCell::all_cells->end(), [index](Cell* cell){return cell->get_current_voxel_index()==index;});
+	std::vector<Cell*> nearby_cells = pCell->nearby_cells();
+	int n_cells = std::count_if(nearby_cells.begin(), nearby_cells.end(), [](Cell* cell){return !(cell->phenotype.death.dead);});
+
+	// The maximum number of cells per voxel is given in the settings xml file
+	int max_cells_nearby = PhysiCell::parameters.ints("max_cells_nearby");
+	double factor = (1.0 * n_cells) / (1.0 * max_cells_nearby);
+
+	// Set the death rate accordingly
+	pCell->phenotype.death.rates[0] = PhysiCell::parameters.doubles("unmodified_death_rate") * factor;
+
+	// std::cout << "Cells: " << n_cells << " ==> Death Rate: " << PhysiCell::parameters.doubles("unmodified_death_rate") << " with factor " << factor << "\n";
+
+	return;
+}
 
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
-{ return; } 
+{
+	double C = pCell->custom_data["light_ion_concentration"];
+	double T1 = PhysiCell::parameters.doubles("light_ion_thresh_death_start");
+	double T2 = PhysiCell::parameters.doubles("light_ion_thresh_death_end");
+	// If the total ion concentration is too high, initiate the death process
+	if (C >= T1 && C <= T2) {
+		// Draw a random number between 0 and 1 and if the random number if lower than the calculated value then kill the cell
+		double rand = PhysiCell::UniformRandom();
+		if (C / (T2 - T1) < rand) {
+			pCell->start_death(pCell->phenotype.death.find_death_model_index(100));
+		}
+	}
+
+	// If the ion concentration exceeds the upper limit, kill the cell immediately
+	if (C > T2) {
+		pCell->start_death(pCell->phenotype.death.find_death_model_index(100));
+	}
+	return;
+}
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
-{ return; } 
+{ return; }
