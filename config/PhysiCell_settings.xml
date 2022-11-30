@@ -257,7 +257,7 @@
 				
 				<motility>  
 					<speed units="micron/min">0.5</speed>
-					<persistence_time units="min">20</persistence_time>
+					<persistence_time units="min">50</persistence_time>
 					<migration_bias units="dimensionless">.2</migration_bias>
 					
 					<options>
