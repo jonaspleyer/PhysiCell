@@ -268,11 +268,12 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 	double C = pCell->custom_data["light_ion_concentration"];
 	double T1 = PhysiCell::parameters.doubles("light_ion_thresh_death_start");
 	double T2 = PhysiCell::parameters.doubles("light_ion_thresh_death_end");
+	double time_scale = PhysiCell::parameters.doubles("light_ion_death_rate") * dt;
 	// If the total ion concentration is too high, initiate the death process
 	if (C >= T1 && C <= T2) {
-		// Draw a random number between 0 and 1 and if the random number if lower than the calculated value then kill the cell
+		// Draw a random number between 0 and 1 and if the random number is lower than the calculated value then kill the cell
 		double rand = PhysiCell::UniformRandom();
-		if (C / (T2 - T1) < rand) {
+		if ((C - T1) / (T2 - T1) * time_scale > rand) {
 			pCell->start_death(pCell->phenotype.death.find_death_model_index(100));
 		}
 	}

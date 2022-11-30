@@ -327,9 +327,10 @@
 
 		<!-- Light Exposure -->
 		<light_ion_thresh_death_start type="double">20.0</light_ion_thresh_death_start>
-		<light_ion_thresh_death_end type="double">200.0</light_ion_thresh_death_end>
+		<light_ion_thresh_death_end type="double">400.0</light_ion_thresh_death_end>
 		<light_ion_exposure_increment type="double">0.05</light_ion_exposure_increment>
 		<light_ion_exposure_increment_max type="double">0.1</light_ion_exposure_increment_max>
+		<light_ion_death_rate type="double">1e-1</light_ion_death_rate>
 
 		<!-- OPTOGENETICS -->
 		<optogenetics_update_dt type="double" units="min">5</optogenetics_update_dt>
