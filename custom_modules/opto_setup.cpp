@@ -42,7 +42,6 @@ void run_optogenetics ( const double& t ) {
 Val DensityObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
     int N_cells = std::count_if(cells.begin(), cells.end(), [](PhysiCell::Cell* cell){return !cell->phenotype.death.dead;});
 
-    // double domain_size = 4.0*M_PI*std::pow(_domain.squared_radius(),3/2)/3.0;
     // Write this to a file for plots later
     std::ofstream outfile;
     outfile.open("information.csv", std::ios_base::app);
@@ -82,6 +81,21 @@ void DensityEffect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Increase the ion cocnentration by the amount of light exposure which is given
 	cell->custom_data["light_ion_concentration"] += dt * increase;
     return;
+}
+
+
+
+// *********************************************************************************
+// LOGGING CONTROLLER MODULES
+Val LoggingObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) {
+    int N_cells = std::count_if(cells.begin(), cells.end(), [](PhysiCell::Cell* cell){return !cell->phenotype.death.dead;});
+
+    // Write this to a file for plots later
+    std::ofstream outfile;
+    outfile.open("information.csv", std::ios_base::app);
+    outfile << id_x << "," << id_y << "," << N_cells << "," << cells.size() << "," << "NaN" << "\n";
+
+    return N_cells;
 }
 
 

@@ -88,6 +88,15 @@ public:
 };
 
 
+class LoggingObservableCuboid : public Opto::Controller::Observable<Val, Kernel::Iso_cuboid_3> {
+	public:
+		Val measure(Kernel::Iso_cuboid_3& _domain, std::vector<PhysiCell::Cell*> cells) override;
+		int id_x;
+		int id_y;
+};
+
+
+
 class LoggingEffect : public Opto::Controller::Effect<Kernel::Iso_cuboid_3> {
     public:
 		std::unique_ptr<Opto::Light::LightSource> lightsource = std::make_unique<Red_LED>();
@@ -113,7 +122,7 @@ public:
 	}
 
 	Kernel::Iso_cuboid_3 domain;
-	std::unique_ptr<DensityObservableCuboid> observable = std::make_unique<DensityObservableCuboid>();
+	std::unique_ptr<LoggingObservableCuboid> observable = std::make_unique<LoggingObservableCuboid>();
     Val target{};
     std::unique_ptr<DensityMetric> metric = std::make_unique<DensityMetric>();
     std::unique_ptr<PD_Controllfunctor> controllfunctor = std::make_unique<PD_Controllfunctor>();
