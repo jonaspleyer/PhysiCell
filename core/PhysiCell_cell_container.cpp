@@ -252,7 +252,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			}
 		}
 			
-/*
+
 		// Compute custom functions, interations, and velocities
 		#pragma omp parallel for
 		for( int i=0; i < (*all_cells).size(); i++ )
@@ -287,7 +287,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 				(*all_cells)[i]->update_position(time_since_last_mechanics);
 			}
 		}
-*/
+
 
 		// When somebody reviews this code, let's add proper braces for clarity!!!
 
