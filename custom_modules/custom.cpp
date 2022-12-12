@@ -191,6 +191,7 @@ void define_cell_parameters( void )
 
 	// Differentiate with respect to density of substrates
 	differentiation_cell->functions.update_phenotype = diff_phenotype_function;
+	differentiation_cell->functions.custom_cell_rule = custom_differentiation_function;
 
 	return;
 }
@@ -236,31 +237,34 @@ void setup_tissue( void )
 	
 	Cell* pC;
 	
-	for( int k=0; k < cell_definitions_by_index.size() ; k++ )
+	// Insert sender cells into simulation domain
+	Cell_Definition* pCD = cell_definitions_by_index[0];
+	int N_cells_sender = parameters.ints("number_of_cells_sender");
+	for( int n = 0 ; n < N_cells_sender ; n++ )
 	{
-		Cell_Definition* pCD = cell_definitions_by_index[k]; 
-		std::cout << "Placing cells of type " << pCD->name << " ... " << std::endl; 
-		int N_cells = 0;
-		if (k==0) {
-		 	N_cells = ceil(parameters.ints("number_of_cells")*frac);
-		} else if (k==1) {
-			N_cells = ceil(parameters.ints("number_of_cells")*(1-frac));
-		}
-		for( int n = 0 ; n < N_cells ; n++ )
-		{
-			std::vector<double> position = {0,0,0}; 
-			position[0] = Xmin + UniformRandom()*Xrange; 
-			if (k==0) {
-				position[1] = Ymin + UniformRandom()*Yrange*frac; 
-			} else if (k==1) {
-				position[1] = Ymin + Yrange*frac + UniformRandom()*Yrange*(1-frac); 
-			}
-			position[2] = Zmin + UniformRandom()*Zrange; 
-			
-			pC = create_cell( *pCD ); 
-			pC->assign_position( position );
-			// pC->phenotype.intracellular = new Diff_Intracellular;
-		}
+		std::vector<double> position = {0,0,0}; 
+		position[0] = Xmin + UniformRandom()*Xrange; 
+		position[1] = Ymin + UniformRandom()*Yrange*frac;
+		position[2] = Zmin + UniformRandom()*Zrange; 
+		
+		pC = create_cell( *pCD ); 
+		pC->assign_position( position );
+		// pC->phenotype.intracellular = new Diff_Intracellular;
+	}
+
+	// Insert receiver cells
+	pCD = cell_definitions_by_index[1];
+	int N_cells_receiver = parameters.ints("number_of_cells_sender");
+	for( int n = 0 ; n < N_cells_receiver ; n++ )
+	{
+		std::vector<double> position = {0,0,0}; 
+		position[0] = Xmin + UniformRandom()*Xrange; 
+		position[1] = Ymin + Yrange*frac + UniformRandom()*Yrange*(1-frac); 
+		position[2] = Zmin + UniformRandom()*Zrange; 
+		
+		pC = create_cell( *pCD ); 
+		pC->assign_position( position );
+		// pC->phenotype.intracellular = new Diff_Intracellular;
 	}
 	std::cout << std::endl; 
 	
@@ -377,6 +381,21 @@ void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
 { return; }
+
+void custom_differentiation_function( Cell* pCell, Phenotype& phenotype, double dt) {
+	double x0 = BioFVM::microenvironment.mesh.bounding_box[0] - BioFVM::microenvironment.mesh.dx;
+    double y0 = BioFVM::microenvironment.mesh.bounding_box[1] - BioFVM::microenvironment.mesh.dy;
+    double z0 = BioFVM::microenvironment.mesh.bounding_box[2] - BioFVM::microenvironment.mesh.dz;
+    double x1 = BioFVM::microenvironment.mesh.bounding_box[3] + BioFVM::microenvironment.mesh.dx;
+    double y1 = BioFVM::microenvironment.mesh.bounding_box[4] + BioFVM::microenvironment.mesh.dy;
+    double z1 = BioFVM::microenvironment.mesh.bounding_box[5] + BioFVM::microenvironment.mesh.dz;
+
+    double frac = PhysiCell::parameters.doubles("fraction_box_height");
+
+	std::vector<double> pos = pCell->position;
+	pos[1] = fmax((y0 + frac*(y1-y0)), pos[1]);
+	pCell->position = pos;
+}
 
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
