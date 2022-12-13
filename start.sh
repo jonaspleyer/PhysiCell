@@ -35,8 +35,8 @@ then
 	# ffmpeg -y -threads 40 -r 15 -f image2 -pattern_type glob -i 'output/*.png' -vcodec libx264 -pix_fmt yuv444p -strict -2 -tune animation movie.mp4
 	# ffmpeg -y -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 5000k -maxrate 8000k -pass 1 -pix_fmt yuv444p -an -f mp4 /dev/null && \
 	# ffmpeg -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 5000k -maxrate 8000k -pass 2 -pix_fmt yuv444p -c:a aac -b:a 192k -movflags faststart output.mp4
-	ffmpeg -y -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 5000k -maxrate 15000k -pass 1 -pix_fmt yuv422p -an -f mp4 /dev/null && \
-	ffmpeg -y -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 20000k -maxrate 30000k -pass 2 -pix_fmt yuv422p -c:a aac -b:a 192k -movflags faststart output.mp4
+	ffmpeg -y -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 5000k -maxrate 15000k -pass 1 -pix_fmt yuv420p -an -f mp4 /dev/null && \
+	ffmpeg -y -pattern_type glob -i 'output/*.png' -c:v libx264 -b:v 15000k -minrate 20000k -maxrate 30000k -pass 2 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags faststart output.mp4
 else
 	echo "Error in Execution of $PROJECT_NAME: Do not continue"
 fi
