@@ -116,22 +116,33 @@ double RHS::P(int id)
 	}
 }
 
-//void RHS::operator() (const std::vector<double> &X, std::vector<double> &dX, const double dt)
+
 void RHS::operator() ( const state_type& X , state_type& dX , const double t )
 {
 	std::fill(dX.begin(), dX.end(), 0);
-	// EXAMPLE FOR 2 EXTERNAL AND 2 INTERNAL SUBSTRATES
-	// This changes the external values
-	dX[0] = P(00) - P(01) * X[0];
-	dX[1] = P(10) - P(11) * X[1];
-	dX[2] = P(20) - P(21) * X[2];
-	dX[3] = P(30) - P(31) * X[3];
+	// *** This changes the external values ***
 
-	// This changes internal and pure internal values
-	dX[4] = P(01) * X[0] - P(03) * X[4];
-	dX[5] = P(11) * X[1] - P(13) * X[5];
-	dX[6] = P(21) * X[2] - P(23) * X[6];
-	dX[6] = P(31) * X[2] - P(33) * X[7];
+	// Morphogen is taken up and secreted
+	dX[0] =
+		+ P(00) * X[2] // Secretion of internal morphogen X[2]
+		- P(01) * X[0]/(1.0 + P(04)*X[0]);// Uptake of external morphogen X[0]
+	
+	// Protein is not taken up or secreted
+	dX[1] = 0.0;
+
+	
+	// *** This changes internal and pure internal values ***
+	// Morphogen
+	dX[2] = 
+		- P(00) * X[2]	// Secretion of internal morphogen X[2]
+		+ P(01) * X[0]/(1.0 + P(04)*X[0])	// Uptake of external morphogen X[0]
+		+ P(02)			// Constant production (modulated by light)
+		- P(03) * X[2];	// Turnover of internal morphogen X[2]
+	
+	// Protein
+	dX[3] = 
+		+ P(10) * X[2]	// Production modulated by intracellular morphogen X[2]
+		- P(11) * X[3];	// Turnover of internal protein X[3]
 
 	// NOTE: The index can easily lead to segmentation faults when going above the implemented substrate limit
 	return;

@@ -53,7 +53,7 @@ Val Diff_ObservableCuboid::measure(Kernel::Iso_cuboid_3& _domain, std::vector<Ph
                 return std::move(sum);
             } else {
                 count += 1;
-                return std::move(sum) + cell->phenotype.intracellular->get_parameter_value(".0");
+                return std::move(sum) + cell->phenotype.intracellular->get_parameter_value(".1");
             }
         }
         );
@@ -71,10 +71,10 @@ void Diff_Effect::apply(PhysiCell::Cell* cell, const double discrepancy) {
     // Thus we need to increase production of substrate1
     // And reduce production of substrate2
     if (cell_correct_type) {
-        double current_value_1 = cell->phenotype.intracellular->get_parameter_value(",00");
+        double current_value_1 = cell->phenotype.intracellular->get_parameter_value(",02");
         // std::cout << current_value_1 << " " << current_value_2 << std::endl;
         double new_value_1 = std::max(current_value_1 + discrepancy, 0.0);
-        cell->phenotype.intracellular->set_parameter_value(00, new_value_1);
+        cell->phenotype.intracellular->set_parameter_value(02, new_value_1);
     }
     return;
 }
@@ -156,7 +156,7 @@ void setup_optogenetics( void ) {
         diff_domains.push_back(_doms);
     };
 
-    Val target = PhysiCell::parameters.doubles("substrate_1_target_intracellular");
+    Val target = PhysiCell::parameters.doubles("protein_target_intracellular");
     int i = 0;
     for (auto const& [_observable_domain, _effect_domain] : diff_domains) {
         auto cont1 = new Diff_Controller(

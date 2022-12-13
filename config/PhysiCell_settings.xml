@@ -124,7 +124,7 @@
 	</options>	
 
 	<microenvironment_setup>
-		<variable name="substrate1" units="dimensionless" ID="0">
+		<variable name="morphogen" units="dimensionless" ID="0">
 			<physical_parameter_set>
 				<diffusion_coefficient units="micron^2/min">75.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
@@ -133,25 +133,9 @@
 			<Dirichlet_boundary_condition units="mmHg" enabled="true">0.0</Dirichlet_boundary_condition>
  		</variable>
 
-		<variable name="substrate2" units="dimensionless" ID="0">
+		<variable name="protein" units="dimensionless" ID="0">
 			<physical_parameter_set>
 				<diffusion_coefficient units="micron^2/min">1000.0</diffusion_coefficient>
-				<decay_rate units="1/min">0</decay_rate>  
-			</physical_parameter_set>
-			<initial_condition units="mmHg">0</initial_condition>
- 		</variable>
-
-		<variable name="substrate3" units="dimensionless" ID="0">
-			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">900.0</diffusion_coefficient>
-				<decay_rate units="1/min">0</decay_rate>  
-			</physical_parameter_set>
-			<initial_condition units="mmHg">0</initial_condition>
- 		</variable>
-
-		<variable name="killer" units="dimensionless" ID="0">
-			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">50.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -282,46 +266,36 @@
 						<use_2D>true</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
-							<substrate>substrate1</substrate>
+							<substrate>morphogen</substrate>
 							<direction>1</direction>
 						</chemotaxis>
 					</options>
 				</motility>
 				
 				<secretion>
-					<substrate name="substrate1">
+					<substrate name="morphogen">
 						<secretion_rate units="1/min">0.0</secretion_rate>
-						<secretion_target units="substrate density">0.0</secretion_target>
+						<secretion_target units="morphogen density">0.0</secretion_target>
 						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
+						<net_export_rate units="total morphogen/min">0</net_export_rate>
                     </substrate> 
-					<substrate name="substrate2">
+					<substrate name="protein">
 						<secretion_rate units="1/min">0.00</secretion_rate>
-						<secretion_target units="substrate density">0</secretion_target>
+						<secretion_target units="protein density">0</secretion_target>
 						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
-                    </substrate>
-					<substrate name="killer">
-						<secretion_rate units="1/min">0.00</secretion_rate>
-						<secretion_target units="substrate density">0</secretion_target>
-						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
+						<net_export_rate units="total protein/min">0</net_export_rate>
                     </substrate>
 				</secretion>
 
 				<intracellular type="ode_solver">
 					<mathml_file>./config/RHS_ODE.xml</mathml_file>
                     <intracellular_dt>0.05</intracellular_dt>
-                    <substrate_int name="substrate1">
-                    	<map substrate="substrate1" mathml_species="A" />
-                    	<initial_condition_int>0</initial_condition_int>
+                    <substrate_int name="morphogen">
+						<map substrate="morphogen" mathml_species="A" />
+						<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
-                    <substrate_int name="substrate2">
-                    	<map substrate="substrate2" mathml_species="B" />
-                    	<initial_condition_int>0</initial_condition_int>
-                    </substrate_int>
-					<substrate_int name="killer">
-                    	<map substrate="killer" mathml_species="C" />
+                    <substrate_int name="protein">
+						<map substrate="protein" mathml_species="B" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
 				</intracellular>
@@ -440,46 +414,36 @@
 						<use_2D>true</use_2D>
 						<chemotaxis>
 							<enabled>false</enabled>
-							<substrate>substrate1</substrate>
+							<substrate>morphogen</substrate>
 							<direction>1</direction>
 						</chemotaxis>
 					</options>
 				</motility>
 				
 				<secretion>
-					<substrate name="substrate1">
+					<substrate name="morphogen">
 						<secretion_rate units="1/min">0.0</secretion_rate>
-						<secretion_target units="substrate density">0.0</secretion_target>
+						<secretion_target units="morphogen density">0.0</secretion_target>
 						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
+						<net_export_rate units="total morphogen/min">0</net_export_rate> 
                     </substrate> 
-					<substrate name="substrate2">
+					<substrate name="protein">
 						<secretion_rate units="1/min">0.00</secretion_rate>
-						<secretion_target units="substrate density">0</secretion_target>
+						<secretion_target units="protein density">0</secretion_target>
 						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
-                    </substrate>
-					<substrate name="killer">
-						<secretion_rate units="1/min">0.00</secretion_rate>
-						<secretion_target units="substrate density">0</secretion_target>
-						<uptake_rate units="1/min">0.0</uptake_rate>
-						<net_export_rate units="total substrate/min">0</net_export_rate> 
+						<net_export_rate units="total protein/min">0</net_export_rate> 
                     </substrate>
 				</secretion>
 
 				<intracellular type="ode_solver">
 					<mathml_file>./config/RHS_ODE.xml</mathml_file>
                     <intracellular_dt>0.05</intracellular_dt>
-                    <substrate_int name="substrate1">
-                    	<map substrate="substrate_diff_1" mathml_species="A1" />
+                    <substrate_int name="morphogen">
+                    	<map substrate="morphogen_diff" mathml_species="A1" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
-                    <substrate_int name="substrate2">
-                    	<map substrate="substrate_diff_2" mathml_species="B1" />
-                    	<initial_condition_int>0</initial_condition_int>
-                    </substrate_int>
-					<substrate_int name="killer">
-                    	<map substrate="killer_diff" mathml_species="C1" />
+                    <substrate_int name="protein">
+                    	<map substrate="protein_diff" mathml_species="B1" />
                     	<initial_condition_int>0</initial_condition_int>
                     </substrate_int>
 				</intracellular>
@@ -522,36 +486,24 @@
 		<diff_enable_2 type="double">2.0</diff_enable_2>
 		<diff_enable_3 type="double">3.0</diff_enable_3>
 
-		<killer_modulation>10</killer_modulation>
-		<killer_threshold>500</killer_threshold>
-
 		<Number_of_domains type="double">1</Number_of_domains>
 
 		<pid_controller_time_proportional type="double">5.0</pid_controller_time_proportional>
 		<pid_controller_time_differential type="double">10</pid_controller_time_differential>
 		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
 
-		<substrate_1_target_intracellular>0.2</substrate_1_target_intracellular>
-		<substrate_2_target_intracellular>0.0</substrate_2_target_intracellular>
-		<substrate_3_target_intracellular>0.0</substrate_3_target_intracellular>
-		<killer_target_intracellular>0.0</killer_target_intracellular>
+		<protein_target_intracellular>0.2</protein_target_intracellular>
 		<!-- END OPTOGENETICS -->
 
 		<!-- ODE SOLVER INTRACELLULAR -->
-		<substrate_1_production_rate>100.0</substrate_1_production_rate>
-		<substrate_1_production_rate>0.0</substrate_1_production_rate>
-		<substrate_1_production_rate>0.0</substrate_1_production_rate>
-		<killer_production_rate>0.0</killer_production_rate>
+		<morphogen_secretion_rate>50.0</morphogen_secretion_rate>
+		<morphogen_uptake_rate>10.0</morphogen_uptake_rate>
+		<morphogen_uptake_coefficient>2.0</morphogen_uptake_coefficient>
+		<morphogen_production_rate>100.0</morphogen_production_rate>
+		<morphogen_turnover_rate type="double" units="1/min">10.0</morphogen_turnover_rate>
 
-		<substrate_1_uptake_rate>0.5</substrate_1_uptake_rate>
-		<substrate_2_uptake_rate>0.2</substrate_2_uptake_rate>
-		<substrate_3_uptake_rate>0.2</substrate_3_uptake_rate>
-		<killer_uptake_rate>0.2</killer_uptake_rate>
-
-		<substrate_1_turnover_rate type="double" units="1/min">10.0</substrate_1_turnover_rate>
-		<substrate_2_turnover_rate type="double" units="1/min">0.1</substrate_2_turnover_rate>
-		<substrate_3_turnover_rate type="double" units="1/min">0.1</substrate_3_turnover_rate>
-		<killer_turnover_rate>0.1</killer_turnover_rate>
+		<protein_production_factor>1.0e-0</protein_production_factor>
+		<protein_turnover_rate type="double" units="1/min">1.0</protein_turnover_rate>
 		<!-- END ODE SOLVER INTRACELLULAR -->
 	</user_parameters>
 	
