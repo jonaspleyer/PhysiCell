@@ -74,10 +74,10 @@
 
 <PhysiCell_settings version="devel-version">
 	<domain>
-		<x_min>-600</x_min>
-		<x_max>600</x_max>
-		<y_min>-200</y_min>
-		<y_max>200</y_max>
+		<x_min>-1000</x_min>
+		<x_max>1000</x_max>
+		<y_min>-1000</y_min>
+		<y_max>1000</y_max>
 		<z_min>-10</z_min>
 		<z_max>10</z_max>
 		<dx>20</dx>
@@ -126,7 +126,7 @@
 	<microenvironment_setup>
 		<variable name="morphogen" units="dimensionless" ID="0">
 			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">75.0</diffusion_coefficient>
+				<diffusion_coefficient units="micron^2/min">2000.0</diffusion_coefficient>
 				<decay_rate units="1/min">0</decay_rate>  
 			</physical_parameter_set>
 			<initial_condition units="mmHg">0</initial_condition>
@@ -405,7 +405,7 @@
 				</mechanics>
 				
 				<motility>  
-					<speed units="micron/min">0.2</speed>
+					<speed units="micron/min">0.1</speed>
 					<persistence_time units="min">20</persistence_time>
 					<migration_bias units="dimensionless">.5</migration_bias>
 					
@@ -467,8 +467,8 @@
 		<!-- GENERAL SETTINGS -->
 		<div_initialization type="divider" description="---Initialization settings---"/>
 		<random_seed type="int" units="dimensionless">0</random_seed>
-		<number_of_cells_sender type="int" units="none" description="initial number of cells (for each cell type)">600</number_of_cells_sender>
-		<number_of_cells_receiver type="int" units="none">250</number_of_cells_receiver>
+		<number_of_cells_sender type="int" units="none" description="initial number of cells (for each cell type)">3000</number_of_cells_sender>
+		<number_of_cells_receiver type="int" units="none">6000</number_of_cells_receiver>
 
 
 		<!-- OPTOGENETICS -->
@@ -476,7 +476,7 @@
 		<optogenetics_dt type="double" units="min">10</optogenetics_dt>
 
 		<!-- USED FOR RECTANGLE FOR OPTOGENETIC CONTROLLERS -->
-		<fraction_box_height>0.4</fraction_box_height>
+		<fraction_box_height>0.3</fraction_box_height>
 
 		<!-- USED FOR OPTOGENETIC DIFFERENTIATION CONTROLLER -->
 		<diff_start type="double">-1.0</diff_start>
@@ -489,10 +489,10 @@
 		<Number_of_domains type="double">1</Number_of_domains>
 
 		<pid_controller_time_proportional type="double">5.0</pid_controller_time_proportional>
-		<pid_controller_time_differential type="double">10</pid_controller_time_differential>
-		<pid_controller_time_integral type="double">3000.0</pid_controller_time_integral>
+		<pid_controller_time_differential type="double">50</pid_controller_time_differential>
+		<pid_controller_time_integral type="double">2000.0</pid_controller_time_integral>
 
-		<protein_target_intracellular>0.2</protein_target_intracellular>
+		<protein_target_intracellular>0.3</protein_target_intracellular>
 		<!-- END OPTOGENETICS -->
 
 		<!-- ODE SOLVER INTRACELLULAR -->
