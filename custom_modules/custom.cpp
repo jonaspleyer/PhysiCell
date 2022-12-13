@@ -130,8 +130,8 @@ void create_cell_types( void )
 
 	
 	cell_defaults.functions.update_phenotype = NULL; 
-	cell_defaults.functions.custom_cell_rule = custom_function; 
-	cell_defaults.functions.contact_function = contact_function; 
+	cell_defaults.functions.custom_cell_rule = membrane_function_sender_cells;
+	cell_defaults.functions.contact_function = NULL;
 	
 	/*
 	   This builds the map of cell definitions and summarizes the setup. 
@@ -174,8 +174,8 @@ void define_cell_parameters( void )
 	differentiation_cell->phenotype.intracellular->set_parameter_value(11, parameters.doubles("protein_turnover_rate"));
 
 	// Differentiate with respect to density of substrates
-	differentiation_cell->functions.update_phenotype = diff_phenotype_function;
-	differentiation_cell->functions.custom_cell_rule = custom_differentiation_function;
+	differentiation_cell->functions.update_phenotype = NULL;
+	differentiation_cell->functions.custom_cell_rule = membrane_function_diff_cells;
 
 	return;
 }
@@ -238,7 +238,7 @@ void setup_tissue( void )
 
 	// Insert receiver cells
 	pCD = cell_definitions_by_index[1];
-	int N_cells_receiver = parameters.ints("number_of_cells_sender");
+	int N_cells_receiver = parameters.ints("number_of_cells_receiver");
 	for( int n = 0 ; n < N_cells_receiver ; n++ )
 	{
 		std::vector<double> position = {0,0,0}; 
@@ -288,25 +288,7 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		output[2] = "rgb(139,69,19)";
 		output[3] = "rgb(139,69,19)";
 	}
-	
-	/* if (pCell->type_name == "differentiation_cell") {
-		output[2] = "white";
-		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_1")) < 0.1)
-		{
-			output[0] = interior_color_diff_1;
-			output[2] = interior_color_diff_1;
-		}
-		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_2")) < 0.1)
-		{
-			output[0] = interior_color_diff_2;
-			output[2] = interior_color_diff_2;
-		}
-		if (fabs(pCell->custom_data["diff"] - PhysiCell::parameters.doubles("diff_enable_3")) < 0.1)
-		{
-			output[0] = interior_color_diff_3;
-			output[2] = interior_color_diff_3;
-		}
-	}*/
+
 	double low = 0.0;
 	double high = 0.4;
 	if (pCell->type_name == "differentiation_cell") {
@@ -320,53 +302,24 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 }
 
 
-// We want the cell to differentiate with a certain probability when enough substrate is around
-void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
+void membrane_function_sender_cells( Cell* pCell, Phenotype& phenotype , double dt )
 {
-	return;
+	double x0 = BioFVM::microenvironment.mesh.bounding_box[0] - BioFVM::microenvironment.mesh.dx;
+    double y0 = BioFVM::microenvironment.mesh.bounding_box[1] - BioFVM::microenvironment.mesh.dy;
+    double z0 = BioFVM::microenvironment.mesh.bounding_box[2] - BioFVM::microenvironment.mesh.dz;
+    double x1 = BioFVM::microenvironment.mesh.bounding_box[3] + BioFVM::microenvironment.mesh.dx;
+    double y1 = BioFVM::microenvironment.mesh.bounding_box[4] + BioFVM::microenvironment.mesh.dy;
+    double z1 = BioFVM::microenvironment.mesh.bounding_box[5] + BioFVM::microenvironment.mesh.dz;
+
+    double frac = PhysiCell::parameters.doubles("fraction_box_height");
+
+	std::vector<double> pos = pCell->position;
+	pos[1] = fmin((y0 + frac*(y1-y0)), pos[1]);
+	pCell->position = pos;
 }
 
 
-void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt )
-{
-	int voxel_index = microenvironment.nearest_voxel_index(pCell->position);
-	std::vector<double> densities = microenvironment.nearest_density_vector(voxel_index);
-	
-	// only for debugging
-	/* bool test = densities[0] > densities[1];
-	std::cout << densities << test << "\n";*/
-
-
-	// If substrate_2 is higher than substrate_1
-	// ==> Differentiate in state 2
-	if (densities[0] > std::max(densities[1], densities[2])) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_1");
-	}
-
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (densities[1] > std::max(densities[0], densities[2])) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_2");
-	}
-
-	// If substrate_1 is higher than substrate_2
-	// ==> Differentiate in state 1
-	if (densities[2] > std::max(densities[0], densities[1])) {
-		pCell->custom_data["diff"] = parameters.doubles("diff_enable_3");
-	}
-
-	// Set the death rate according to the density of the killer substrate
-	int death_index = phenotype.death.find_death_model_index(100);
-	phenotype.death.rates[death_index] = std::min((densities[3] - parameters.doubles("killer_threshold"))/parameters.doubles("killer_modulation"), 0.0);
-
-	return;
-}
-
-
-void custom_function( Cell* pCell, Phenotype& phenotype , double dt )
-{ return; }
-
-void custom_differentiation_function( Cell* pCell, Phenotype& phenotype, double dt) {
+void membrane_function_diff_cells( Cell* pCell, Phenotype& phenotype, double dt) {
 	double x0 = BioFVM::microenvironment.mesh.bounding_box[0] - BioFVM::microenvironment.mesh.dx;
     double y0 = BioFVM::microenvironment.mesh.bounding_box[1] - BioFVM::microenvironment.mesh.dy;
     double z0 = BioFVM::microenvironment.mesh.bounding_box[2] - BioFVM::microenvironment.mesh.dz;
@@ -380,7 +333,3 @@ void custom_differentiation_function( Cell* pCell, Phenotype& phenotype, double 
 	pos[1] = fmax((y0 + frac*(y1-y0)), pos[1]);
 	pCell->position = pos;
 }
-
-
-void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
-{ return; } 

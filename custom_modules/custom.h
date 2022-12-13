@@ -99,13 +99,5 @@ std::vector<std::string> my_coloring_function( Cell* );
 
 // custom functions can go here 
 
-void phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
-
-void diff_phenotype_function( Cell* pCell, Phenotype& phenotype, double dt );
-
-void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
-
-void custom_differentiation_function( Cell* pCell, Phenotype& phenotype, double dt);
-
-void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 
-
+void membrane_function_sender_cells( Cell* pCell, Phenotype& phenotype, double dt);
+void membrane_function_diff_cells( Cell* pCell, Phenotype& phenotype, double dt);
